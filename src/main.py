@@ -5,6 +5,8 @@ from pathlib import Path
 
 def input_audio_file():
     file_path = Path(input('Please enter a path to a wav file: '))
+    while not file_path.exists():
+        file_path = Path(input('Please enter a path to a wav file: '))
     sig, samplerate = sf.read(file_path)
     # prints frames and channels for file, for babyelephantwalk60 should be 1323000 and empty/1
     print(sig.shape)
