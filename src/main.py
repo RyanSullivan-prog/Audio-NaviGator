@@ -8,13 +8,15 @@ def input_audio_file():
     file_path = Path(file_string)
     # verify path exists and points to wav
     while not (file_path.exists() and file_string.endswith('.wav')):
+        # verify path exists
         if not file_path.exists():
             print('Path does not exist.')
+        # if path exists, verify points to wav file
         if not file_string.endswith('.wav') and file_path.exists():
             print('Path does not point to wav file')
+        # ask for new input
         file_string = input('Please enter a path to a wav file: ')
         file_path = Path(file_string)
-    # verify path leads to wav file
 
     sig, samplerate = sf.read(file_path)
     # prints frames and channels for file, for babyelephantwalk60 should be 1323000 and empty/1
