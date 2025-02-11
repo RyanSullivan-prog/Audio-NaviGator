@@ -28,4 +28,4 @@ def input_audio_file():
 
 if __name__ == "__main__":
     browse_files()
-    input_audio_file()
+    # input_audio_file()
