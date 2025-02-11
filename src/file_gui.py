@@ -7,7 +7,10 @@ from tkinter import filedialog
 def browse_files():
     file_name = filedialog.askopenfilename(initialdir='/', title='select a file',
                                            filetypes=(('Wav files', '*.wav'), ('All files', '*.*')))
-    label_file_explorer.configure(text='File opened: ' + file_name)
+    if not file_name.endswith('.wav'):
+        label_file_explorer.configure(text='Please select a .wav file')
+    else:
+        label_file_explorer.configure(text='File opened: ' + file_name)
 
 
 window = Tk()
