@@ -1,6 +1,7 @@
 # working with soundfile tutorial https://github.com/mgeier/python-audio/blob/d8b877bc91e1637aae628bc9d225531fac021de7/audio-files/audio-files-with-pysoundfile.ipynb
 import soundfile as sf
 from pathlib import Path
+from file_gui import *
 
 
 def input_audio_file():
@@ -26,4 +27,5 @@ def input_audio_file():
 
 
 if __name__ == "__main__":
-    input_audio_file()
+    browse_files()
+    # input_audio_file()
