@@ -9,6 +9,7 @@ def browse_files():
                                            filetypes=(('Wav files', '*.wav'), ('All files', '*.*')))
     if not file_name.endswith('.wav'):
         label_file_explorer.configure(text='Please select a .wav file')
+        #label_sound_data.configure(text='')
     else:
         label_file_explorer.configure(text='File opened: ' + file_name)
 
@@ -27,10 +28,14 @@ button_explore = Button(window, text='Browse Files', command=browse_files)
 
 button_exit = Button(window, text='Exit', command=exit)
 
+label_sound_data = Label(window, text='', width=100, height=4, fg='blue')
+
 label_file_explorer.grid(column=1, row=1)
 
 button_explore.grid(column=1, row=2)
 
 button_exit.grid(column=1, row=3)
+
+label_sound_data.grid(column=1, row=4)
 
 window.mainloop()
