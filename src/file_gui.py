@@ -2,6 +2,7 @@
 
 from tkinter import *
 from tkinter import filedialog
+import soundfile as sf
 
 
 def browse_files():
@@ -9,9 +10,10 @@ def browse_files():
                                            filetypes=(('Wav files', '*.wav'), ('All files', '*.*')))
     if not file_name.endswith('.wav'):
         label_file_explorer.configure(text='Please select a .wav file')
-        #label_sound_data.configure(text='')
     else:
         label_file_explorer.configure(text='File opened: ' + file_name)
+        sig, samplerate = sf.read(file_name)
+        label_sound_data.configure(text=str(sig.shape)+' '+str(samplerate))
 
 
 window = Tk()
