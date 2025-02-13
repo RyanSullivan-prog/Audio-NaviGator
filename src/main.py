@@ -21,6 +21,8 @@ def input_audio_file():
 
     sig, samplerate = sf.read(file_path)
     # prints frames and channels for file, for babyelephantwalk60 should be 1323000 and empty/1
+    print(sig.shape[0])
+    print(len(sig.shape))
     print(sig.shape)
     # prints samplerate for file, for babyelephanwalk60 should be 22050
     print(samplerate)
@@ -28,4 +30,4 @@ def input_audio_file():
 
 if __name__ == "__main__":
     browse_files()
-    # input_audio_file()
+    input_audio_file()
