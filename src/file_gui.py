@@ -29,7 +29,7 @@ window.geometry('700x500')
 
 window.config(background='white')
 
-label_file_explorer = Label(window, text='File input using Tkinter', width=100, height=4, fg='blue')
+label_file_explorer = Label(window, text='File input', width=100, height=4, fg='blue')
 
 button_explore = Button(window, text='Browse Files', command=browse_files)
 
