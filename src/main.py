@@ -1,8 +1,7 @@
 # working with soundfile tutorial https://github.com/mgeier/python-audio/blob/d8b877bc91e1637aae628bc9d225531fac021de7/audio-files/audio-files-with-pysoundfile.ipynb
 import soundfile as sf
 from pathlib import Path
-import demucs.separate
-#from file_gui import *
+from file_gui import *
 
 
 def input_audio_file():
@@ -32,6 +31,6 @@ def input_audio_file():
 
 if __name__ == "__main__":
     #file_path = input_audio_file()
-    demucs.separate.main(["--mp3", "-n", "htdemucs", "C:/Users/rysul/Downloads/Jim O'Rourke - Insignificance - 01 All Downhill From Here.mp3"])
-    #browse_files()
+    #demucs.separate.main(["--mp3", "-n", "htdemucs", "C:/Users/rysul/Downloads/Jim O'Rourke - Insignificance - 01 All Downhill From Here.mp3"])
+    browse_files()
     #input_audio_file()

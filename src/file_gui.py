@@ -3,6 +3,7 @@
 from tkinter import *
 from tkinter import filedialog
 import soundfile as sf
+import demucs.separate
 
 
 def browse_files():
@@ -19,6 +20,9 @@ def browse_files():
         else:
             label_sound_data.configure(
                 text='Audio has ' + str(sig.shape[0]) + ' frames, ' + sig.shape[1] + ' channels, and a sample rate of ' + str(samplerate) + ' Hz')
+        demucs.separate.main(["--mp3", "-n", "htdemucs", file_name])
+        label_waiting.configure(text='Done')
+
 
 
 window = Tk()
@@ -37,6 +41,8 @@ button_exit = Button(window, text='Exit', command=exit)
 
 label_sound_data = Label(window, text='', width=100, height=4, fg='blue')
 
+label_waiting = Label(window, text='Waiting', width=100, height=4, fg='blue')
+
 label_file_explorer.grid(column=1, row=1)
 
 button_explore.grid(column=1, row=2)
@@ -44,5 +50,7 @@ button_explore.grid(column=1, row=2)
 button_exit.grid(column=1, row=3)
 
 label_sound_data.grid(column=1, row=4)
+
+label_waiting.grid(column=1, row=5)
 
 window.mainloop()
