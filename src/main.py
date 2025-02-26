@@ -31,7 +31,7 @@ def input_audio_file():
 
 
 if __name__ == "__main__":
-    file_path = input_audio_file()
-    demucs.separate.main(["--mp3", "--two-stems", "vocals", "-n", "mdx_extra", "C:/Users/rysul/Downloads/Jim O'Rourke - Insignificance - 01 All Downhill From Here.mp3"])
+    #file_path = input_audio_file()
+    demucs.separate.main(["--mp3", "-n", "htdemucs", "C:/Users/rysul/Downloads/Jim O'Rourke - Insignificance - 01 All Downhill From Here.mp3"])
     #browse_files()
     #input_audio_file()
