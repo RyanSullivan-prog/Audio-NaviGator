@@ -1,14 +1,15 @@
 # working with soundfile tutorial https://github.com/mgeier/python-audio/blob/d8b877bc91e1637aae628bc9d225531fac021de7/audio-files/audio-files-with-pysoundfile.ipynb
 import soundfile as sf
 from pathlib import Path
-from file_gui import *
+import demucs.separate
+#from file_gui import *
 
 
 def input_audio_file():
     file_string = input('Please enter a path to a wav file: ')
     file_path = Path(file_string)
     # verify path exists and points to wav
-    while not (file_path.exists() and file_string.endswith('.wav')):
+    while not (file_path.exists() and file_string.endswith('.wav') or file_string.endswith('.mp3')):
         # verify path exists
         if not file_path.exists():
             print('Path does not exist.')
@@ -18,6 +19,7 @@ def input_audio_file():
         # ask for new input
         file_string = input('Please enter a path to a wav file: ')
         file_path = Path(file_string)
+        return file_string
 
     sig, samplerate = sf.read(file_path)
     # prints frames and channels for file, for babyelephantwalk60 should be 1323000 and empty/1
@@ -29,5 +31,7 @@ def input_audio_file():
 
 
 if __name__ == "__main__":
-    browse_files()
-    input_audio_file()
+    file_path = input_audio_file()
+    demucs.separate.main(["--mp3", "--two-stems", "vocals", "-n", "mdx_extra", "C:/Users/rysul/Downloads/Jim O'Rourke - Insignificance - 01 All Downhill From Here.mp3"])
+    #browse_files()
+    #input_audio_file()
