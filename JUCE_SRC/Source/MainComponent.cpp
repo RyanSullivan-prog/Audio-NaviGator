@@ -8,7 +8,10 @@ MainComponent::MainComponent() : openButton("Open")
     // Make sure you set the size of the component after
     // you add any child components.
     setSize (200, 100);
+    openButton.onClick = [this] { openButtonClicked(); };
     addAndMakeVisible(&openButton);
+
+    formatManager.registerBasicFormats();
 
     // Some platforms require permissions to open input channels so request that here
     if (juce::RuntimePermissions::isRequired (juce::RuntimePermissions::recordAudio)
@@ -51,6 +54,33 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
     // Right now we are not producing any data, in which case we need to clear the buffer
     // (to prevent the output of random noise)
     bufferToFill.clearActiveBufferRegion();
+}
+
+void MainComponent::openButtonClicked()
+{
+    chooser = std::make_unique<juce::FileChooser>("Select a Wave file to play...",
+        juce::File{},
+        "*.wav");                     // [7]
+    auto chooserFlags = juce::FileBrowserComponent::openMode
+        | juce::FileBrowserComponent::canSelectFiles;
+
+    chooser->launchAsync(chooserFlags, [this](const juce::FileChooser& fc)     // [8]
+    {
+        auto file = fc.getResult();
+
+        if (file != juce::File{})                                                // [9]
+        {
+            auto* reader = formatManager.createReaderFor(file);                 // [10]
+
+            if (reader != nullptr)
+            {
+                auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);   // [11]
+                //transportSource.setSource(newSource.get(), 0, nullptr, reader->sampleRate);       // [12]
+                //playButton.setEnabled(true);                                                      // [13]
+                //readerSource.reset(newSource.release());                                          // [14]
+            }
+        }
+    });
 }
 
 void MainComponent::releaseResources()
