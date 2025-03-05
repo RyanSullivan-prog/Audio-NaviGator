@@ -2,8 +2,10 @@
 
 using namespace juce;
 
+// file selecter and audio player created using https://docs.juce.com/master/tutorial_playing_sound_files.html, https://www.youtube.com/watch?v=eB6S8iWvx2k, and https://www.youtube.com/watch?v=vVnu-L712ho
+
 //==============================================================================
-MainComponent::MainComponent() : openButton("Open"), playButton("Play"), stopButton("Stop")
+MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton("Play"), stopButton("Stop")
 {
     // Make sure you set the size of the component after
     // you add any child components.
@@ -11,12 +13,12 @@ MainComponent::MainComponent() : openButton("Open"), playButton("Play"), stopBut
     openButton.onClick = [this] { openButtonClicked(); };
     addAndMakeVisible(&openButton);
 
-    playButton.onClick = [this] {; };
+    playButton.onClick = [this] {playButtonClicked(); };
     playButton.setColour(TextButton::buttonColourId, Colours::green);
-    playButton.setEnabled(true);
+    playButton.setEnabled(false);
     addAndMakeVisible(&playButton);
 
-    stopButton.onClick = [this] {; };
+    stopButton.onClick = [this] {stopButtonClicked(); };
     stopButton.setColour(TextButton::buttonColourId, Colours::red);
     stopButton.setEnabled(false);
     addAndMakeVisible(&stopButton);
@@ -53,6 +55,8 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     // but be careful - it will be called on the audio thread, not the GUI thread.
 
     // For more details, see the help for AudioProcessor::prepareToPlay()
+
+    transport.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
@@ -64,13 +68,15 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
     // Right now we are not producing any data, in which case we need to clear the buffer
     // (to prevent the output of random noise)
     bufferToFill.clearActiveBufferRegion();
+
+    transport.getNextAudioBlock(bufferToFill);
 }
 
 void MainComponent::openButtonClicked()
 {
-    chooser = std::make_unique<juce::FileChooser>("Select a Wave file to play...",
+    chooser = std::make_unique<juce::FileChooser>("Select a Wave or mp3 file to play...",
         juce::File{},
-        "*.wav");                     // [7]
+        "*.wav; *.mp3");                     // [7]
     auto chooserFlags = juce::FileBrowserComponent::openMode
         | juce::FileBrowserComponent::canSelectFiles;
 
@@ -85,13 +91,49 @@ void MainComponent::openButtonClicked()
             if (reader != nullptr)
             {
                 auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);   // [11]
-                //transportSource.setSource(newSource.get(), 0, nullptr, reader->sampleRate);       // [12]
-                //playButton.setEnabled(true);                                                      // [13]
+                transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);       // [12]
+                playButton.setEnabled(true);     
+                stopButton.setEnabled(false);
                 playSource.reset(newSource.release());                                          // [14]
                 DBG(reader->getFormatName());
             }
         }
     });
+}
+
+void MainComponent::playButtonClicked()
+{
+    transportStateChanged(Starting);
+}
+
+void MainComponent::stopButtonClicked()
+{
+    transportStateChanged(Stopping);
+}
+
+void MainComponent::transportStateChanged(TransportState newState) 
+{
+    if (newState != state)
+    {
+        state = newState;
+    }
+
+    switch (state) {
+        case Stopped:
+            playButton.setEnabled(true);
+            transport.setPosition(0.0);
+            break;
+        case Starting:
+            stopButton.setEnabled(true);
+            playButton.setEnabled(false);
+            transport.start();
+            break;
+        case Stopping:
+            playButton.setEnabled(true);
+            stopButton.setEnabled(false);
+            transport.stop();
+            break;
+    }
 }
 
 void MainComponent::releaseResources()

@@ -28,13 +28,30 @@ public:
 private:
     //==============================================================================
     // Your private member variables go here...
+    enum TransportState
+    {
+        Stopped,
+        Starting,
+        Stopping
+    };
+
+    TransportState state;
+    
     void openButtonClicked();
+
+    void playButtonClicked();
+
+    void stopButtonClicked();
+
+    void transportStateChanged(TransportState newState);
 
     AudioFormatManager formatManager;
 
     std::unique_ptr<juce::FileChooser> chooser;
 
     std::unique_ptr<AudioFormatReaderSource> playSource;
+
+    AudioTransportSource transport;
 
     TextButton openButton;
     TextButton playButton;
