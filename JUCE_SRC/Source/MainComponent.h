@@ -34,7 +34,11 @@ private:
 
     std::unique_ptr<juce::FileChooser> chooser;
 
+    std::unique_ptr<AudioFormatReaderSource> playSource;
+
     TextButton openButton;
+    TextButton playButton;
+    TextButton stopButton;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

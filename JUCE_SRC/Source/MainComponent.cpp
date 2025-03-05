@@ -3,13 +3,23 @@
 using namespace juce;
 
 //==============================================================================
-MainComponent::MainComponent() : openButton("Open")
+MainComponent::MainComponent() : openButton("Open"), playButton("Play"), stopButton("Stop")
 {
     // Make sure you set the size of the component after
     // you add any child components.
-    setSize (200, 100);
+    setSize (200, 150);
     openButton.onClick = [this] { openButtonClicked(); };
     addAndMakeVisible(&openButton);
+
+    playButton.onClick = [this] {; };
+    playButton.setColour(TextButton::buttonColourId, Colours::green);
+    playButton.setEnabled(true);
+    addAndMakeVisible(&playButton);
+
+    stopButton.onClick = [this] {; };
+    stopButton.setColour(TextButton::buttonColourId, Colours::red);
+    stopButton.setEnabled(false);
+    addAndMakeVisible(&stopButton);
 
     formatManager.registerBasicFormats();
 
@@ -77,7 +87,8 @@ void MainComponent::openButtonClicked()
                 auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);   // [11]
                 //transportSource.setSource(newSource.get(), 0, nullptr, reader->sampleRate);       // [12]
                 //playButton.setEnabled(true);                                                      // [13]
-                //readerSource.reset(newSource.release());                                          // [14]
+                playSource.reset(newSource.release());                                          // [14]
+                DBG(reader->getFormatName());
             }
         }
     });
@@ -103,6 +114,8 @@ void MainComponent::paint (juce::Graphics& g)
 void MainComponent::resized()
 {
     openButton.setBounds(10, 10, getWidth() - 20, 30);
+    playButton.setBounds(10, 50, getWidth() - 20, 30);
+    stopButton.setBounds(10, 90, getWidth() - 20, 30);
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.
