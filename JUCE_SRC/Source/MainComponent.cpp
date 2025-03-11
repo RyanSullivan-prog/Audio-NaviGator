@@ -87,10 +87,27 @@ void MainComponent::openButtonClicked()
         DBG(fc.getResult().getFullPathName());
 
         std::string myPath = (fc.getResult().getFullPathName().toStdString());
-        
+       
         std::string myFull = "demucs \"" + myPath + "\"";
 
-        int result = system(myFull.c_str());
+        juce::File temp = temp.getCurrentWorkingDirectory();
+
+        std::string myCurrentDir = temp.getFullPathName().toStdString();
+
+        std::string myFileName = fc.getResult().getFileNameWithoutExtension().toStdString();
+
+        std::string myPathToInstruments = myCurrentDir + "\\separated\\htdemucs\\" + myFileName;
+
+        juce::File myInstruments = File(myPathToInstruments);
+
+
+        // outputs C:\Users\rysul\Documents\JUCE Projects\audio player\simpleAudioPlayer\Builds\VisualStudio2019\separated\htdemucs\C:\Users\rysul\Downloads\Jim O'Rourke - Eureka - 08 Happy Holidays.mp3
+        // cut off c users rsul downloads from jim o rourke
+        DBG(myPathToInstruments);
+
+        // saved to directory of solution file
+        //int result = system(myFull.c_str());
+        int result = system("dir");
         if (result == 0) {
             std::cout << "Command executed successfully." << std::endl;
         }
@@ -122,6 +139,7 @@ void MainComponent::playButtonClicked()
 
 void MainComponent::stopButtonClicked()
 {
+    int result = system("dir");
     transportStateChanged(Stopping);
 }
 
