@@ -84,6 +84,20 @@ void MainComponent::openButtonClicked()
     {
         auto file = fc.getResult();
 
+        DBG(fc.getResult().getFullPathName());
+
+        std::string myPath = (fc.getResult().getFullPathName().toStdString());
+        
+        std::string myFull = "demucs \"" + myPath + "\"";
+
+        int result = system(myFull.c_str());
+        if (result == 0) {
+            std::cout << "Command executed successfully." << std::endl;
+        }
+        else {
+            std::cerr << "Command execution failed." << std::endl;
+        }
+
         if (file != juce::File{})                                                // [9]
         {
             auto* reader = formatManager.createReaderFor(file);                 // [10]
