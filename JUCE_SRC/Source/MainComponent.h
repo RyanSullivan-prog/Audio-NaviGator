@@ -43,6 +43,14 @@ private:
 
     void stopButtonClicked();
 
+    void bassButtonClicked();
+
+    void drumsButtonClicked();
+
+    void vocalsButtonClicked();
+
+    void otherButtonClicked();
+
     void transportStateChanged(TransportState newState);
 
     AudioFormatManager formatManager;
@@ -53,9 +61,15 @@ private:
 
     AudioTransportSource transport;
 
+    std::string myPathToInstruments;
+
     TextButton openButton;
     TextButton playButton;
     TextButton stopButton;
+    TextButton bassButton;
+    TextButton drumsButton;
+    TextButton vocalsButton;
+    TextButton otherButton;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

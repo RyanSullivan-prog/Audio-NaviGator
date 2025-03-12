@@ -5,11 +5,11 @@ using namespace juce;
 // file selecter and audio player created using https://docs.juce.com/master/tutorial_playing_sound_files.html, https://www.youtube.com/watch?v=eB6S8iWvx2k, and https://www.youtube.com/watch?v=vVnu-L712ho
 
 //==============================================================================
-MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton("Play"), stopButton("Stop")
+MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton("Play"), stopButton("Stop"), bassButton("Bass"), drumsButton("Drums"), vocalsButton("Vocals"), otherButton("Other")
 {
     // Make sure you set the size of the component after
     // you add any child components.
-    setSize (200, 150);
+    setSize (200, 400);
     openButton.onClick = [this] { openButtonClicked(); };
     addAndMakeVisible(&openButton);
 
@@ -22,6 +22,29 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
     stopButton.setColour(TextButton::buttonColourId, Colours::red);
     stopButton.setEnabled(false);
     addAndMakeVisible(&stopButton);
+
+    bassButton.onClick = [this] {bassButtonClicked(); };
+    bassButton.setColour(TextButton::buttonColourId, Colours::blue);
+    bassButton.setEnabled(false);
+    addAndMakeVisible(&bassButton);
+
+    drumsButton.onClick = [this] {drumsButtonClicked(); };
+    drumsButton.setColour(TextButton::buttonColourId, Colours::blue);
+    drumsButton.setEnabled(false);
+    addAndMakeVisible(&drumsButton);
+
+    vocalsButton.onClick = [this] {vocalsButtonClicked(); };
+    vocalsButton.setColour(TextButton::buttonColourId, Colours::blue);
+    vocalsButton.setEnabled(false);
+    addAndMakeVisible(&vocalsButton);
+
+    otherButton.onClick = [this] {otherButtonClicked(); };
+    otherButton.setColour(TextButton::buttonColourId, Colours::blue);
+    otherButton.setEnabled(false);
+    addAndMakeVisible(&otherButton);
+
+    myPathToInstruments = "";
+
 
     formatManager.registerBasicFormats();
 
@@ -96,23 +119,33 @@ void MainComponent::openButtonClicked()
 
         std::string myFileName = fc.getResult().getFileNameWithoutExtension().toStdString();
 
-        std::string myPathToInstruments = myCurrentDir + "\\separated\\htdemucs\\" + myFileName;
+        myPathToInstruments = myCurrentDir + "\\separated\\htdemucs\\" + myFileName;
 
         juce::File myInstruments = File(myPathToInstruments);
 
-
-        // outputs C:\Users\rysul\Documents\JUCE Projects\audio player\simpleAudioPlayer\Builds\VisualStudio2019\separated\htdemucs\C:\Users\rysul\Downloads\Jim O'Rourke - Eureka - 08 Happy Holidays.mp3
-        // cut off c users rsul downloads from jim o rourke
         DBG(myPathToInstruments);
 
         // saved to directory of solution file
-        //int result = system(myFull.c_str());
+       // int result = system(myFull.c_str());
         int result = system("dir");
         if (result == 0) {
             std::cout << "Command executed successfully." << std::endl;
         }
         else {
             std::cerr << "Command execution failed." << std::endl;
+        }
+
+        if (myInstruments.isDirectory()) {
+            bassButton.setEnabled(true);
+            drumsButton.setEnabled(true);
+            vocalsButton.setEnabled(true);
+            otherButton.setEnabled(true);
+        }
+        else {
+            bassButton.setEnabled(false);
+            drumsButton.setEnabled(false);
+            vocalsButton.setEnabled(false);
+            otherButton.setEnabled(false);
         }
 
         if (file != juce::File{})                                                // [9]
@@ -126,7 +159,6 @@ void MainComponent::openButtonClicked()
                 playButton.setEnabled(true);     
                 stopButton.setEnabled(false);
                 playSource.reset(newSource.release());                                          // [14]
-                DBG(reader->getFormatName());
             }
         }
     });
@@ -139,8 +171,87 @@ void MainComponent::playButtonClicked()
 
 void MainComponent::stopButtonClicked()
 {
-    int result = system("dir");
     transportStateChanged(Stopping);
+}
+
+void MainComponent::bassButtonClicked()
+{
+    std::string bassPath = myPathToInstruments + "\\bass.mp3";
+    juce::File bassFile = juce::File(bassPath);
+
+    if (bassFile != juce::File{})                                               
+    {
+        auto* reader = formatManager.createReaderFor(bassFile);                 
+
+        if (reader != nullptr)
+        {
+            auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);  
+            transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);       
+            playButton.setEnabled(true);
+            stopButton.setEnabled(false);
+            playSource.reset(newSource.release());                                          
+        }
+    }
+}
+
+void MainComponent::drumsButtonClicked()
+{
+    std::string drumsPath = myPathToInstruments + "\\drums.mp3";
+    juce::File drumsFile = juce::File(drumsPath);
+
+    if (drumsFile != juce::File{})
+    {
+        auto* reader = formatManager.createReaderFor(drumsFile);
+
+        if (reader != nullptr)
+        {
+            auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
+            transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
+            playButton.setEnabled(true);
+            stopButton.setEnabled(false);
+            playSource.reset(newSource.release());
+        }
+    }
+}
+
+void MainComponent::vocalsButtonClicked()
+{
+    std::string vocalsPath = myPathToInstruments + "\\vocals.mp3";
+    juce::File vocalsFile = juce::File(vocalsPath);
+
+    if (vocalsFile != juce::File{})
+    {
+        auto* reader = formatManager.createReaderFor(vocalsFile);
+
+        if (reader != nullptr)
+        {
+            auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
+            transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
+            playButton.setEnabled(true);
+            stopButton.setEnabled(false);
+            playSource.reset(newSource.release());
+        }
+    }
+}
+
+void MainComponent::otherButtonClicked()
+{
+    std::string otherPath = myPathToInstruments + "\\other.mp3";
+    juce::File otherFile = juce::File(otherPath);
+
+    if (otherFile != juce::File{})
+    {
+        auto* reader = formatManager.createReaderFor(otherFile);
+
+        if (reader != nullptr)
+        {
+            auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
+            transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
+            playButton.setEnabled(true);
+            stopButton.setEnabled(false);
+            playSource.reset(newSource.release());
+        }
+    }
 }
 
 void MainComponent::transportStateChanged(TransportState newState) 
@@ -190,6 +301,10 @@ void MainComponent::resized()
     openButton.setBounds(10, 10, getWidth() - 20, 30);
     playButton.setBounds(10, 50, getWidth() - 20, 30);
     stopButton.setBounds(10, 90, getWidth() - 20, 30);
+    bassButton.setBounds(10, 130, getWidth() - 20, 30);
+    drumsButton.setBounds(10, 170, getWidth() - 20, 30);
+    vocalsButton.setBounds(10, 210, getWidth() - 20, 30);
+    otherButton.setBounds(10, 250, getWidth() - 20, 30);
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.
