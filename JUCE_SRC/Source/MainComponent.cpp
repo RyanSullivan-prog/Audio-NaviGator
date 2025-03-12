@@ -176,7 +176,7 @@ void MainComponent::stopButtonClicked()
 
 void MainComponent::bassButtonClicked()
 {
-    std::string bassPath = myPathToInstruments + "\\bass.mp3";
+    std::string bassPath = myPathToInstruments + "\\bass.wav";
     juce::File bassFile = juce::File(bassPath);
 
     if (bassFile != juce::File{})                                               
@@ -196,7 +196,7 @@ void MainComponent::bassButtonClicked()
 
 void MainComponent::drumsButtonClicked()
 {
-    std::string drumsPath = myPathToInstruments + "\\drums.mp3";
+    std::string drumsPath = myPathToInstruments + "\\drums.wav";
     juce::File drumsFile = juce::File(drumsPath);
 
     if (drumsFile != juce::File{})
@@ -216,15 +216,19 @@ void MainComponent::drumsButtonClicked()
 
 void MainComponent::vocalsButtonClicked()
 {
-    std::string vocalsPath = myPathToInstruments + "\\vocals.mp3";
+    DBG("Vocals clicked");
+    std::string vocalsPath = myPathToInstruments + "\\vocals.wav";
     juce::File vocalsFile = juce::File(vocalsPath);
 
     if (vocalsFile != juce::File{})
     {
+        DBG("Past vocalsFile if");
+        DBG(vocalsFile.getFullPathName().toStdString());
         auto* reader = formatManager.createReaderFor(vocalsFile);
 
         if (reader != nullptr)
         {
+            DBG("Past reader nullptr");
             auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
             transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
             playButton.setEnabled(true);
@@ -236,7 +240,7 @@ void MainComponent::vocalsButtonClicked()
 
 void MainComponent::otherButtonClicked()
 {
-    std::string otherPath = myPathToInstruments + "\\other.mp3";
+    std::string otherPath = myPathToInstruments + "\\other.wav";
     juce::File otherFile = juce::File(otherPath);
 
     if (otherFile != juce::File{})
