@@ -125,6 +125,16 @@ void MainComponent::openButtonClicked()
        
         std::string myFull = "demucs \"" + originalFilePath + "\"";
 
+        // saved to directory of solution file
+        int result = system(myFull.c_str());
+        //int result = system("dir");
+        if (result == 0) {
+            std::cout << "Command executed successfully." << std::endl;
+        }
+        else {
+            std::cerr << "Command execution failed." << std::endl;
+        }
+
         juce::File temp = temp.getCurrentWorkingDirectory();
 
         std::string myCurrentDir = temp.getFullPathName().toStdString();
@@ -136,16 +146,6 @@ void MainComponent::openButtonClicked()
         juce::File myInstruments = File(myPathToInstruments);
 
         DBG(myPathToInstruments);
-
-        // saved to directory of solution file
-       // int result = system(myFull.c_str());
-        int result = system("dir");
-        if (result == 0) {
-            std::cout << "Command executed successfully." << std::endl;
-        }
-        else {
-            std::cerr << "Command execution failed." << std::endl;
-        }
 
         if (myInstruments.isDirectory()) {
             bassButton.setEnabled(true);
