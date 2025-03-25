@@ -5,11 +5,11 @@ using namespace juce;
 // file selecter and audio player created using https://docs.juce.com/master/tutorial_playing_sound_files.html, https://www.youtube.com/watch?v=eB6S8iWvx2k, and https://www.youtube.com/watch?v=vVnu-L712ho
 
 //==============================================================================
-MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton("Play"), stopButton("Stop"), bassButton("Bass"), drumsButton("Drums"), vocalsButton("Vocals"), otherButton("Other"), songButton("Full Song")
+MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton("Play"), stopButton("Stop"), bassButton("Bass"), drumsButton("Drums"), vocalsButton("Vocals"), otherButton("Other"), songButton("Full Song"), thumbnailCache(5), thumbnail(512, formatManager, thumbnailCache)
 {
     // Make sure you set the size of the component after
     // you add any child components.
-    setSize (200, 400);
+    setSize(200, 400);
     openButton.onClick = [this] { openButtonClicked(); };
     addAndMakeVisible(&openButton);
 
@@ -55,18 +55,19 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
 
 
     formatManager.registerBasicFormats();
+    thumbnail.addChangeListener (this);
 
     // Some platforms require permissions to open input channels so request that here
-    if (juce::RuntimePermissions::isRequired (juce::RuntimePermissions::recordAudio)
-        && ! juce::RuntimePermissions::isGranted (juce::RuntimePermissions::recordAudio))
+    if (juce::RuntimePermissions::isRequired(juce::RuntimePermissions::recordAudio)
+        && !juce::RuntimePermissions::isGranted(juce::RuntimePermissions::recordAudio))
     {
-        juce::RuntimePermissions::request (juce::RuntimePermissions::recordAudio,
-                                           [&] (bool granted) { setAudioChannels (granted ? 2 : 0, 2); });
+        juce::RuntimePermissions::request(juce::RuntimePermissions::recordAudio,
+            [&](bool granted) { setAudioChannels(granted ? 2 : 0, 2); });
     }
     else
     {
         // Specify the number of input and output channels that we want to open
-        setAudioChannels (2, 2);
+        setAudioChannels(2, 2);
     }
 }
 
@@ -77,7 +78,7 @@ MainComponent::~MainComponent()
 }
 
 //==============================================================================
-void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate)
+void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
     // This function will be called when the audio device is started, or when
     // its settings (i.e. sample rate, block size, etc) are changed.
@@ -90,7 +91,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
     transport.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
-void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
+void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
     // Your audio-processing code goes here!
 
@@ -112,68 +113,68 @@ void MainComponent::openButtonClicked()
         | juce::FileBrowserComponent::canSelectFiles;
 
     chooser->launchAsync(chooserFlags, [this](const juce::FileChooser& fc)     // [8]
-    {
-        auto file = fc.getResult();
-
-        originalFile = file;
-
-        DBG(fc.getResult().getFullPathName());
-
-        std::string originalFilePath = (fc.getResult().getFullPathName().toStdString());
-
-        DBG("originalfilepath is " + originalFilePath);
-       
-        std::string myFull = "demucs \"" + originalFilePath + "\"";
-
-        // saved to directory of solution file
-        int result = system(myFull.c_str());
-        //int result = system("dir");
-        if (result == 0) {
-            std::cout << "Command executed successfully." << std::endl;
-        }
-        else {
-            std::cerr << "Command execution failed." << std::endl;
-        }
-
-        juce::File temp = temp.getCurrentWorkingDirectory();
-
-        std::string myCurrentDir = temp.getFullPathName().toStdString();
-
-        std::string myFileName = fc.getResult().getFileNameWithoutExtension().toStdString();
-
-        myPathToInstruments = myCurrentDir + "\\separated\\htdemucs\\" + myFileName;
-
-        juce::File myInstruments = File(myPathToInstruments);
-
-        DBG(myPathToInstruments);
-
-        if (myInstruments.isDirectory()) {
-            bassButton.setEnabled(true);
-            drumsButton.setEnabled(true);
-            vocalsButton.setEnabled(true);
-            otherButton.setEnabled(true);
-        }
-        else {
-            bassButton.setEnabled(false);
-            drumsButton.setEnabled(false);
-            vocalsButton.setEnabled(false);
-            otherButton.setEnabled(false);
-        }
-
-        if (file != juce::File{})                                                // [9]
         {
-            auto* reader = formatManager.createReaderFor(file);                 // [10]
+            auto file = fc.getResult();
 
-            if (reader != nullptr)
-            {
-                auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);   // [11]
-                transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);       // [12]
-                playButton.setEnabled(true);     
-                stopButton.setEnabled(false);
-                playSource.reset(newSource.release());                                          // [14]
+            originalFile = file;
+
+            DBG(fc.getResult().getFullPathName());
+
+            std::string originalFilePath = (fc.getResult().getFullPathName().toStdString());
+
+            DBG("originalfilepath is " + originalFilePath);
+
+            std::string myFull = "python3 -m demucs \"" + originalFilePath + "\"";
+
+            // saved to directory of solution file
+            int result = system(myFull.c_str());
+            //int result = system("dir");
+            if (result == 0) {
+                std::cout << "Command executed successfully." << std::endl;
             }
-        }
-    });
+            else {
+                std::cerr << "Command execution failed." << std::endl;
+            }
+
+            juce::File temp = temp.getCurrentWorkingDirectory();
+
+            std::string myCurrentDir = temp.getFullPathName().toStdString();
+
+            std::string myFileName = fc.getResult().getFileNameWithoutExtension().toStdString();
+
+            myPathToInstruments = myCurrentDir + "\\separated\\htdemucs\\" + myFileName;
+
+            juce::File myInstruments = File(myPathToInstruments);
+
+            DBG(myPathToInstruments);
+
+            if (myInstruments.isDirectory()) {
+                bassButton.setEnabled(true);
+                drumsButton.setEnabled(true);
+                vocalsButton.setEnabled(true);
+                otherButton.setEnabled(true);
+            }
+            else {
+                bassButton.setEnabled(false);
+                drumsButton.setEnabled(false);
+                vocalsButton.setEnabled(false);
+                otherButton.setEnabled(false);
+            }
+
+            if (file != juce::File{})                                                // [9]
+            {
+                auto* reader = formatManager.createReaderFor(file);                 // [10]
+
+                if (reader != nullptr)
+                {
+                    auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);   // [11]
+                    transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);       // [12]
+                    playButton.setEnabled(true);
+                    stopButton.setEnabled(false);
+                    playSource.reset(newSource.release());                                          // [14]
+                }
+            }
+        });
 }
 
 void MainComponent::playButtonClicked()
@@ -191,14 +192,14 @@ void MainComponent::bassButtonClicked()
     std::string bassPath = myPathToInstruments + "\\bass.wav";
     juce::File bassFile = juce::File(bassPath);
 
-    if (bassFile != juce::File{})                                               
+    if (bassFile != juce::File{})
     {
-        auto* reader = formatManager.createReaderFor(bassFile);                 
+        auto* reader = formatManager.createReaderFor(bassFile);
 
         if (reader != nullptr)
         {
-            auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);  
-            transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);       
+            auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
+            transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
             playButton.setEnabled(true);
             stopButton.setEnabled(false);
             songButton.setEnabled(true);
@@ -206,7 +207,7 @@ void MainComponent::bassButtonClicked()
             drumsButton.setEnabled(true);
             vocalsButton.setEnabled(true);
             otherButton.setEnabled(true);
-            playSource.reset(newSource.release());                                          
+            playSource.reset(newSource.release());
         }
     }
 }
@@ -319,7 +320,7 @@ void MainComponent::songButtonClicked()
     }
 }
 
-void MainComponent::transportStateChanged(TransportState newState) 
+void MainComponent::transportStateChanged(TransportState newState)
 {
     if (newState != state)
     {
@@ -327,20 +328,20 @@ void MainComponent::transportStateChanged(TransportState newState)
     }
 
     switch (state) {
-        case Stopped:
-            playButton.setEnabled(true);
-            transport.setPosition(0.0);
-            break;
-        case Starting:
-            stopButton.setEnabled(true);
-            playButton.setEnabled(false);
-            transport.start();
-            break;
-        case Stopping:
-            playButton.setEnabled(true);
-            stopButton.setEnabled(false);
-            transport.stop();
-            break;
+    case Stopped:
+        playButton.setEnabled(true);
+        transport.setPosition(0.0);
+        break;
+    case Starting:
+        stopButton.setEnabled(true);
+        playButton.setEnabled(false);
+        transport.start();
+        break;
+    case Stopping:
+        playButton.setEnabled(true);
+        stopButton.setEnabled(false);
+        transport.stop();
+        break;
     }
 }
 
@@ -353,10 +354,10 @@ void MainComponent::releaseResources()
 }
 
 //==============================================================================
-void MainComponent::paint (juce::Graphics& g)
+void MainComponent::paint(juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
 
     // You can add your drawing code here!
 }
