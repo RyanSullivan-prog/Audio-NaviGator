@@ -9,7 +9,7 @@ using namespace juce;
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent  : public juce::AudioAppComponent, private juce::ChangeListener
+class MainComponent  : public juce::AudioAppComponent, private juce::ChangeListener, private juce::Timer
 {
 public:
     //==============================================================================
@@ -60,6 +60,8 @@ private:
     void transportStateChanged(TransportState newState);
 
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
+
+    void timerCallback() override;
 
     AudioFormatManager formatManager;
 

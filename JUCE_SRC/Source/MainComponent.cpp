@@ -58,6 +58,8 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
     formatManager.registerBasicFormats();
     thumbnail.addChangeListener(this);
 
+    startTimer(40);
+
     // Some platforms require permissions to open input channels so request that here
     if (juce::RuntimePermissions::isRequired (juce::RuntimePermissions::recordAudio)
         && ! juce::RuntimePermissions::isGranted (juce::RuntimePermissions::recordAudio))
@@ -363,6 +365,10 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source) {
         repaint();
 }
 
+void MainComponent::timerCallback() {
+    repaint();
+}
+
 void MainComponent::releaseResources()
 {
     // This will be called when the audio device stops, or when it is being
@@ -379,6 +385,16 @@ void MainComponent::paint (juce::Graphics& g)
         paintIfNoFileLoaded(g, thumbnailBounds);
     else
         paintIfFileLoaded(g, thumbnailBounds);
+    auto duration = (float)transport.getLengthInSeconds();
+
+    if (duration > 0.0)
+    {
+        auto audioPosition = (float)transport.getCurrentPosition();
+        auto drawPosition = (audioPosition / duration) * (float)getWidth() + 10;
+
+        g.setColour(juce::Colours::green);
+        g.drawLine(drawPosition, 350.0f, drawPosition, (float)getHeight()-30, 2.0f);
+    }
 }
 
 void MainComponent::paintIfNoFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds)
