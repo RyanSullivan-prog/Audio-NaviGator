@@ -29,5 +29,17 @@ def input_audio_file():
 
 
 if __name__ == "__main__":
-    browse_files()
-    input_audio_file()
+    if len(sys.argv) > 1:
+        file_name = sys.argv[1]
+        if not file_name.endswith('.wav'):
+            print('Please select a .wav file')
+        else:
+            print('File selected: ' + file_name)
+            sig, samplerate = sf.read(file_name)
+            if len(sig.shape) == 1:
+                print('Audio has ' + str(sig.shape[0]) + ' frames, 1 channel, and a sample rate of ' + str(samplerate) + ' Hz')
+            else:
+                print('Audio has ' + str(sig.shape[0]) + ' frames, ' + sig.shape[1] + ' channels, and a sample rate of ' + str(samplerate) + ' Hz')
+    else:
+        browse_files()
+    #input_audio_file()
