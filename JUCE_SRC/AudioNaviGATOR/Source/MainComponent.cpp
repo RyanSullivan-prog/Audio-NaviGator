@@ -119,37 +119,38 @@ void MainComponent::openButtonClicked()
         {
             auto file = fc.getResult();
 
-            originalFile = file;
+        originalFile = file;
 
-            DBG(fc.getResult().getFullPathName());
-
-            std::string originalFilePath = (fc.getResult().getFullPathName().toStdString());
-
-            DBG("originalfilepath is " + originalFilePath);
-
-            std::string myFull = "demucs \"" + originalFilePath + "\"";
-
-            // saved to directory of solution file
-            //int result = system(myFull.c_str());
-            int result = system("dir");
-            if (result == 0) {
-                std::cout << "Command executed successfully." << std::endl;
-            }
-            else {
-                std::cerr << "Command execution failed." << std::endl;
-            }
+        std::string originalFilePath = (fc.getResult().getFullPathName().toStdString());
 
             juce::File temp = temp.getCurrentWorkingDirectory();
 
             std::string myCurrentDir = temp.getFullPathName().toStdString();
 
-            std::string myFileName = fc.getResult().getFileNameWithoutExtension().toStdString();
+        std::string myFileName = fc.getResult().getFileNameWithoutExtension().toStdString();
+       
+        std::string myFull = "demucs \"" + originalFilePath + "\"";
 
+        // if using forward slash operating system use forward slashes, else backslash
+        if (originalFilePath.find("/") != std::string::npos) {
+            myPathToInstruments = myCurrentDir + "/separated/htdemucs/" + myFileName;
+        }
+        else {
             myPathToInstruments = myCurrentDir + "\\separated\\htdemucs\\" + myFileName;
+        }
 
             juce::File myInstruments = File(myPathToInstruments);
 
-            DBG(myPathToInstruments);
+        if (!myInstruments.exists()) {
+            int result = system(myFull.c_str());
+            if (result == 0) {
+                std::cout << "Command executed successfully." << std::endl;
+                myInstruments = File(myPathToInstruments);
+            }
+            else {
+                std::cerr << "Command execution failed." << std::endl;
+            }
+        }
 
             if (myInstruments.isDirectory()) {
                 bassButton.setEnabled(true);
