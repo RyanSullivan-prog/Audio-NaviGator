@@ -3,6 +3,7 @@
 from tkinter import *
 from tkinter import filedialog
 import soundfile as sf
+import sys
 
 
 def browse_files():
@@ -45,4 +46,5 @@ button_exit.grid(column=1, row=3)
 
 label_sound_data.grid(column=1, row=4)
 
-window.mainloop()
+if len(sys.argv) == 1:
+    window.mainloop()
