@@ -9,7 +9,7 @@ using namespace juce;
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent : public juce::AudioAppComponent, private juce::ChangeListener, private juce::Timer
+class MainComponent  : public juce::AudioAppComponent, private juce::ChangeListener, private juce::Timer
 {
 public:
     //==============================================================================
@@ -17,12 +17,12 @@ public:
     ~MainComponent() override;
 
     //==============================================================================
-    void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
-    void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) override;
+    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
+    void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override;
     void releaseResources() override;
 
     //==============================================================================
-    void paint(juce::Graphics& g) override;
+    void paint (juce::Graphics& g) override;
     void resized() override;
 
     void paintIfNoFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds);
@@ -36,13 +36,12 @@ private:
         Stopped,
         Starting,
         Playing,
-        Pausing,
-        Paused,
-        Stopping
+        Stopping,
+        Pausing
     };
 
     TransportState state;
-
+    
     void openButtonClicked();
 
     void playButtonClicked();
@@ -91,5 +90,5 @@ private:
     AudioThumbnailCache thumbnailCache;
     AudioThumbnail thumbnail;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
