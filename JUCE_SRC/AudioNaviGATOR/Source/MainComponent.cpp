@@ -174,6 +174,7 @@ void MainComponent::openButtonClicked()
                 auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);   // [11]
                 transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);       // [12]
                 playButton.setEnabled(true);     
+                playButton.setButtonText("Play");
                 stopButton.setEnabled(false);
                 thumbnail.setSource(new juce::FileInputSource(file));
                 playSource.reset(newSource.release());                                          // [14]
