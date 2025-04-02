@@ -184,12 +184,22 @@ void MainComponent::openButtonClicked()
 
 void MainComponent::playButtonClicked()
 {
-    transportStateChanged(Starting);
+    if (state == Stopped || state == Paused) {
+        transportStateChanged(Starting);
+    }
+    else if (state == Starting) {
+        transportStateChanged(Pausing);
+    }
 }
 
 void MainComponent::stopButtonClicked()
 {
-    transportStateChanged(Stopping);
+    if (state == Paused) {
+        transportStateChanged(Stopped);
+    }
+    else {
+        transportStateChanged(Stopping);
+    }
 }
 
 void MainComponent::bassButtonClicked()
@@ -339,29 +349,61 @@ void MainComponent::transportStateChanged(TransportState newState)
 
     switch (state) {
     case Stopped:
+        std::cout << "Stopped" << std::endl;
+        playButton.setButtonText("Play");
         stopButton.setEnabled(false);
         playButton.setEnabled(true);
-        transport.setPosition(0.0);
+        stopButton.setButtonText("Stop");
         break;
     case Starting:
+        std::cout << "Starting" << std::endl;
+        playButton.setButtonText("Pause");
         stopButton.setEnabled(true);
-        playButton.setEnabled(false);
         transport.start();
         break;
     case Playing:
+        std::cout << "Playing" << std::endl;
+        stopButton.setButtonText("Stop");
         stopButton.setEnabled(true);
+        transport.start();
+        break;
+    case Pausing:
+        std::cout << "Pausing" << std::endl;
+        transport.stop();
+        break;
+    case Paused:
+        std::cout << "Paused" << std::endl;
+        playButton.setEnabled(true);
+        stopButton.setEnabled(true);
+        playButton.setButtonText("Resume");
+        stopButton.setButtonText("Restart");
         break;
     case Stopping:
-        playButton.setEnabled(true);
+        std::cout << "Stopping" << std::endl;
         stopButton.setEnabled(false);
         transport.stop();
+        transport.setPosition(0.0);
         break;
     }
 }
 
 void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source) {
-    if (source == &transport)
-        transportStateChanged(transport.isPlaying() ? Playing : Stopped);
+    /*if (source == &transport)
+        transportStateChanged(transport.isPlaying() ? Playing : Stopped);*/
+    if (source == &transport) {
+        if (transport.isPlaying()) {
+            transportStateChanged(Playing);
+        }
+        else if ((state == Stopping) || (state == Playing)) {
+            transportStateChanged(Stopped);
+        }
+        else if (state == Pausing) {
+            transportStateChanged(Paused);
+        }
+        else {
+            transportStateChanged(Stopped);
+        }
+    }
     if (source == &thumbnail)
         repaint();
 }
@@ -374,7 +416,7 @@ void MainComponent::releaseResources()
 {
     // This will be called when the audio device stops, or when it is being
     // restarted due to a setting change.
-
+    transport.releaseResources();
     // For more details, see the help for AudioProcessor::releaseResources()
 }
 
