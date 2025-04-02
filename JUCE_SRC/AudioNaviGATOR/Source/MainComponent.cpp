@@ -195,12 +195,7 @@ void MainComponent::playButtonClicked()
 
 void MainComponent::stopButtonClicked()
 {
-    if (state == Paused) {
-        transportStateChanged(Stopped);
-    }
-    else {
-        transportStateChanged(Stopping);
-    }
+    transportStateChanged(Stopping);
 }
 
 void MainComponent::bassButtonClicked()
@@ -397,7 +392,7 @@ void MainComponent::releaseResources()
 {
     // This will be called when the audio device stops, or when it is being
     // restarted due to a setting change.
-    transport.releaseResources();
+
     // For more details, see the help for AudioProcessor::releaseResources()
 }
 
