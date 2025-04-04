@@ -410,10 +410,12 @@ void MainComponent::paint (juce::Graphics& g)
     if (duration > 0.0)
     {
         auto audioPosition = (float)transport.getCurrentPosition();
-        auto drawPosition = (audioPosition / duration) * (float)getWidth() + 10;
-
+        auto drawPosition = (audioPosition / duration) * (float)thumbnailBounds.getWidth() + 10;
         g.setColour(juce::Colours::green);
         g.drawLine(drawPosition, 350.0f, drawPosition, (float)getHeight()-30, 2.0f);
+        if ((float)transport.getCurrentPosition() >= duration) {
+            transportStateChanged(Stopped);
+        }
     }
 }
 
