@@ -54,6 +54,17 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
 
     originalFile = File();
 
+    addAndMakeVisible(scrubSlider);
+    scrubSlider.setRange(0, 1);
+    scrubSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, -1, -1);
+    scrubSlider.setSliderStyle(Slider::SliderStyle::LinearHorizontal);
+    //scrubSlider.setTextValueSuffix(" ms");
+    scrubSlider.addListener(this);
+
+    //addAndMakeVisible(scrubLabel);
+    //scrubLabel.setText("Current time", juce::dontSendNotification);
+    //scrubLabel.attachToComponent(&scrubSlider, true);
+
 
     formatManager.registerBasicFormats();
     thumbnail.addChangeListener(this);
@@ -178,6 +189,11 @@ void MainComponent::openButtonClicked()
                 stopButton.setEnabled(false);
                 thumbnail.setSource(new juce::FileInputSource(file));
                 playSource.reset(newSource.release());                                          // [14]
+
+                scrubSlider.setRange(0, transport.getLengthInSeconds());
+                //scrubSlider.setTextValueSuffix(" ms"); // necessary?
+                //scrubLabel.setText("Current time", juce::dontSendNotification);
+                //scrubLabel.attachToComponent(&scrubSlider, true);
             }
         }
     });
@@ -385,8 +401,14 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source) {
         repaint();
 }
 
+
+void MainComponent::sliderValueChanged(juce::Slider* slider) {
+    if (slider->isMouseButtonDown()) { transport.setPosition(scrubSlider.getValue()); }
+}
+
 void MainComponent::timerCallback() {
     repaint();
+    scrubSlider.setValue(transport.getCurrentPosition());
 }
 
 void MainComponent::releaseResources()
@@ -447,4 +469,7 @@ void MainComponent::resized()
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.
+
+    auto sliderLeft = 0;
+    scrubSlider.setBounds(sliderLeft, 330, getWidth(), 20);
 }
