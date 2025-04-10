@@ -9,7 +9,7 @@ using namespace juce;
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent  : public juce::AudioAppComponent
+class MainComponent  : public juce::AudioAppComponent, private juce::ChangeListener, private juce::Timer
 {
 public:
     //==============================================================================
@@ -25,6 +25,9 @@ public:
     void paint (juce::Graphics& g) override;
     void resized() override;
 
+    void paintIfNoFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds);
+    void paintIfFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds);
+
 private:
     //==============================================================================
     // Your private member variables go here...
@@ -32,7 +35,9 @@ private:
     {
         Stopped,
         Starting,
-        Stopping
+        Playing,
+        Stopping,
+        Pausing
     };
 
     TransportState state;
@@ -43,7 +48,21 @@ private:
 
     void stopButtonClicked();
 
+    void bassButtonClicked();
+
+    void drumsButtonClicked();
+
+    void vocalsButtonClicked();
+
+    void otherButtonClicked();
+
+    void songButtonClicked();
+
     void transportStateChanged(TransportState newState);
+
+    void changeListenerCallback(juce::ChangeBroadcaster* source) override;
+
+    void timerCallback() override;
 
     AudioFormatManager formatManager;
 
@@ -53,9 +72,23 @@ private:
 
     AudioTransportSource transport;
 
+    std::string myPathToInstruments;
+
+    std::string originalFilePath;
+
+    juce::File originalFile;
+
     TextButton openButton;
     TextButton playButton;
     TextButton stopButton;
+    TextButton bassButton;
+    TextButton drumsButton;
+    TextButton vocalsButton;
+    TextButton otherButton;
+    TextButton songButton;
+
+    AudioThumbnailCache thumbnailCache;
+    AudioThumbnail thumbnail;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
