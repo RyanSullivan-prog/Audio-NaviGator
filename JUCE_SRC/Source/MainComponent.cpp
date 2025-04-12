@@ -101,6 +101,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
 {
+    // guide on changing volume from https://forum.juce.com/t/volume-control-in-audio-player/44551/7
     // Your audio-processing code goes here!
 
     // For more details, see the help for AudioProcessor::getNextAudioBlock()
@@ -110,6 +111,14 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
     bufferToFill.clearActiveBufferRegion();
 
     transport.getNextAudioBlock(bufferToFill);
+
+    auto level = (float)dial1.getValue();
+    for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); ++channel) {
+        auto* buffer = bufferToFill.buffer->getWritePointer(channel, bufferToFill.startSample);
+        for (auto sample = 0; sample < bufferToFill.numSamples; ++sample) {
+            buffer[sample] = buffer[sample] * level;
+        }
+    }
 }
 
 void MainComponent::openButtonClicked()
