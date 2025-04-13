@@ -92,5 +92,9 @@ private:
 
     Slider dial1;
 
+    Slider decibelSlider;
+
+    float level = 0.0f;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

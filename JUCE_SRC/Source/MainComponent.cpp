@@ -55,9 +55,16 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
 
     originalFile = File();
 
-    addAndMakeVisible(&dial1);
     dial1.setSliderStyle(Slider::SliderStyle::Rotary);
     dial1.setTextBoxStyle(Slider::TextBoxBelow, true, 100, 25);
+    addAndMakeVisible(&dial1);
+
+    //decibelSlider.setSliderStyle(Slider::SliderStyle::LinearBar);
+    decibelSlider.setRange(-80, 35);
+    decibelSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 100, 20);
+    decibelSlider.onValueChange = [this] { level = Decibels::decibelsToGain((float)decibelSlider.getValue()); };
+    decibelSlider.setValue(juce::Decibels::gainToDecibels(level));
+    addAndMakeVisible(&decibelSlider);
 
 
     formatManager.registerBasicFormats();
@@ -112,11 +119,12 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 
     transport.getNextAudioBlock(bufferToFill);
 
-    auto level = (float)dial1.getValue();
+    auto currentLevel = level;
+    auto levelScale = currentLevel * 2.0f;
     for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); ++channel) {
         auto* buffer = bufferToFill.buffer->getWritePointer(channel, bufferToFill.startSample);
         for (auto sample = 0; sample < bufferToFill.numSamples; ++sample) {
-            buffer[sample] = buffer[sample] * level;
+            buffer[sample] = buffer[sample] * levelScale - currentLevel;
         }
     }
 }
@@ -459,7 +467,8 @@ void MainComponent::resized()
     vocalsButton.setBounds(10, 210, getWidth() - 20, 30);
     otherButton.setBounds(10, 250, getWidth() - 20, 30);
     songButton.setBounds(10, 290, getWidth() - 20, 30);
-    dial1.setBounds((getWidth() - 20) / 2, 350, (getWidth() - 20) / 2, getHeight() - 380);
+    //dial1.setBounds((getWidth() - 20) / 2, 350, (getWidth() - 20) / 2, getHeight() - 380);
+    decibelSlider.setBounds((getWidth() - 20) / 2, 350, (getWidth() - 20) / 2, getHeight() - 380);
     DBG(dial1.getValue());
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
