@@ -109,6 +109,7 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill)
 {
     // guide on changing volume from https://forum.juce.com/t/volume-control-in-audio-player/44551/7
+    // decibel volume control guide from https://juce.com/tutorials/tutorial_synth_db_level_control/
     // Your audio-processing code goes here!
 
     // For more details, see the help for AudioProcessor::getNextAudioBlock()
