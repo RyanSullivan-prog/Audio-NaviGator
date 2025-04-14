@@ -78,6 +78,8 @@ private:
 
     juce::File originalFile;
 
+    juce::File myInstruments;
+
     TextButton openButton;
     TextButton playButton;
     TextButton stopButton;

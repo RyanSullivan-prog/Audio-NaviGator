@@ -55,10 +55,6 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
 
     originalFile = File();
 
-    dial1.setSliderStyle(Slider::SliderStyle::Rotary);
-    dial1.setTextBoxStyle(Slider::TextBoxBelow, true, 100, 25);
-    addAndMakeVisible(&dial1);
-
     //decibelSlider.setSliderStyle(Slider::SliderStyle::LinearBar);
     decibelSlider.setRange(-80, 35);
     decibelSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 100, 20);
@@ -151,18 +147,26 @@ void MainComponent::openButtonClicked()
         std::string myCurrentDir = temp.getFullPathName().toStdString();
 
         std::string myFileName = fc.getResult().getFileNameWithoutExtension().toStdString();
+
+        myPathToInstruments = temp.getChildFile("separated").getChildFile("htdemucs").getChildFile(myFileName).getFullPathName().toStdString();
+
+        myInstruments = temp.getChildFile("separated").getChildFile("htdemucs").getChildFile(myFileName);
        
-        std::string myFull = "demucs \"" + originalFilePath + "\"";
+        std::string myFull = "";
+        if (originalFilePath.find("/") != std::string::npos) {
+            myFull = "demucs /" + originalFilePath + "/";
+        }
+        else {
+            myFull = "demucs \"" + originalFilePath + "\"";
+        }
 
         // if using forward slash operating system use forward slashes, else backslash
-        if (originalFilePath.find("/") != std::string::npos) {
+       /* if (originalFilePath.find("/") != std::string::npos) {
             myPathToInstruments = myCurrentDir + "/separated/htdemucs/" + myFileName;
         }
         else {
             myPathToInstruments = myCurrentDir + "\\separated\\htdemucs\\" + myFileName;
-        }
-
-        juce::File myInstruments = File(myPathToInstruments);
+        }*/
 
         if (!myInstruments.exists()) {
             int result = system(myFull.c_str());
@@ -225,7 +229,7 @@ void MainComponent::stopButtonClicked()
 void MainComponent::bassButtonClicked()
 {
     std::string bassPath = myPathToInstruments + "\\bass.wav";
-    juce::File bassFile = juce::File(bassPath);
+    juce::File bassFile = myInstruments.getChildFile("bass.wav");
 
     if (bassFile != juce::File{})                                               
     {
@@ -252,7 +256,7 @@ void MainComponent::bassButtonClicked()
 void MainComponent::drumsButtonClicked()
 {
     std::string drumsPath = myPathToInstruments + "\\drums.wav";
-    juce::File drumsFile = juce::File(drumsPath);
+    juce::File drumsFile = myInstruments.getChildFile("drums.wav");
 
     if (drumsFile != juce::File{})
     {
@@ -280,7 +284,7 @@ void MainComponent::vocalsButtonClicked()
 {
     DBG("Vocals clicked");
     std::string vocalsPath = myPathToInstruments + "\\vocals.wav";
-    juce::File vocalsFile = juce::File(vocalsPath);
+    juce::File vocalsFile = myInstruments.getChildFile("vocals.wav");
 
     DBG("originalfilepath is " + originalFilePath);
 
@@ -312,7 +316,7 @@ void MainComponent::vocalsButtonClicked()
 void MainComponent::otherButtonClicked()
 {
     std::string otherPath = myPathToInstruments + "\\other.wav";
-    juce::File otherFile = juce::File(otherPath);
+    juce::File otherFile = myInstruments.getChildFile("other.wav");
 
     if (otherFile != juce::File{})
     {
@@ -468,9 +472,7 @@ void MainComponent::resized()
     vocalsButton.setBounds(10, 210, getWidth() - 20, 30);
     otherButton.setBounds(10, 250, getWidth() - 20, 30);
     songButton.setBounds(10, 290, getWidth() - 20, 30);
-    //dial1.setBounds((getWidth() - 20) / 2, 350, (getWidth() - 20) / 2, getHeight() - 380);
-    decibelSlider.setBounds((getWidth() - 20) / 2, 350, (getWidth() - 20) / 2, getHeight() - 380);
-    DBG(dial1.getValue());
+    decibelSlider.setBounds((getWidth() - 20) / 2 + 10, 350, (getWidth() - 20) / 2, getHeight() - 380);
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.
