@@ -116,12 +116,29 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
 
     transport.getNextAudioBlock(bufferToFill);
 
+    /*WavAudioFormat format;
+    std::unique_ptr<AudioFormatWriter> writer;
+    juce::File file = juce::File(file.getCurrentWorkingDirectory());
+    file = file.getChild
+    writer.reset(format.createWriterFor(new FileOutputStream(file),
+        48000.0,
+        bufferToFill.buffer->getNumChannels(),
+        24,
+        {},
+        0));
+    if (writer != nullptr)
+        writer->writeFromAudioSampleBuffer(*bufferToFill.buffer, 0, bufferToFill.buffer->getNumSamples());
+        */
     auto currentLevel = level;
     auto levelScale = currentLevel * 2.0f;
+    auto audioPosition = 0.0;
     for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); ++channel) {
         auto* buffer = bufferToFill.buffer->getWritePointer(channel, bufferToFill.startSample);
         for (auto sample = 0; sample < bufferToFill.numSamples; ++sample) {
-            buffer[sample] = buffer[sample] * levelScale - currentLevel;
+            audioPosition = (float)transport.getCurrentPosition();
+            if (audioPosition > 5.0 && audioPosition < 10.0) {
+                buffer[sample] = buffer[sample] * levelScale - currentLevel;
+            }
         }
     }
 }
@@ -152,13 +169,7 @@ void MainComponent::openButtonClicked()
 
         myInstruments = temp.getChildFile("separated").getChildFile("htdemucs").getChildFile(myFileName);
        
-        std::string myFull = "";
-        if (originalFilePath.find("/") != std::string::npos) {
-            myFull = "demucs /" + originalFilePath + "/";
-        }
-        else {
-            myFull = "demucs \"" + originalFilePath + "\"";
-        }
+        std::string myFull = "demucs \"" + originalFilePath + "\"";
 
         // if using forward slash operating system use forward slashes, else backslash
        /* if (originalFilePath.find("/") != std::string::npos) {
