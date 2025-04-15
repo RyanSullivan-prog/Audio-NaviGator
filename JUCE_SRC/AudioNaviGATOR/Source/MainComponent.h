@@ -44,6 +44,8 @@ private:
     
     void openButtonClicked();
 
+    void loadStems();
+
     void playButtonClicked();
 
     void stopButtonClicked();
@@ -58,26 +60,26 @@ private:
 
     void songButtonClicked();
 
+    void newSongButtonClicked();
+
     void transportStateChanged(TransportState newState);
 
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
     void sliderValueChanged(juce::Slider* slider) override;
-
-
     void timerCallback() override;
 
     AudioFormatManager formatManager;
 
     std::unique_ptr<juce::FileChooser> chooser;
-
-    std::unique_ptr<AudioFormatReaderSource> playSource;
-
-    AudioTransportSource transport;
+    std::vector<juce::File> files;
+    std::unique_ptr<AudioTransportSource> transports;
+    std::vector<std::unique_ptr<AudioTransportSource>> transports;
+    std::vector<std::unique_ptr<AudioFormatReaderSource>> readers;
+    std::unique_ptr<juce::MixerAudioSource> mixer;
+    juce::AudioSourcePlayer ASP;
 
     std::string myPathToInstruments;
-
     std::string originalFilePath;
-
     juce::File originalFile;
 
     TextButton openButton;
@@ -88,6 +90,7 @@ private:
     TextButton vocalsButton;
     TextButton otherButton;
     TextButton songButton;
+    TextButton newSongButton;
 
     AudioThumbnailCache thumbnailCache;
     AudioThumbnail thumbnail;
