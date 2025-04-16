@@ -60,6 +60,8 @@ private:
     
     void sliderButtonClicked();
 
+    void process();
+
     void transportStateChanged(TransportState newState);
 
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
@@ -117,6 +119,9 @@ private:
 
     juce::Slider scrubSlider;
     juce::Label scrubLabel;
+
+    dsp::ProcessSpec mySpec;
+    dsp::Reverb myReverb;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

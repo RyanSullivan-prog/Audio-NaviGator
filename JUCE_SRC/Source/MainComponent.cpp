@@ -127,6 +127,13 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 
     // For more details, see the help for AudioProcessor::prepareToPlay()
 
+    mySpec.sampleRate = sampleRate;
+    mySpec.maximumBlockSize = samplesPerBlockExpected;
+    mySpec.numChannels = 0;
+
+    myReverb.process(mySpec);
+    
+
     transport.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
@@ -143,6 +150,24 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
     bufferToFill.clearActiveBufferRegion();
 
     transport.getNextAudioBlock(bufferToFill);
+
+    AudioBuffer<float> temp;
+
+    temp.makeCopyOf(*bufferToFill.buffer);
+
+    juce::dsp::AudioBlock<float> block(temp);
+
+    dsp::ProcessContextReplacing<float> myProcess (block);
+
+    dsp::Reverb::Parameters myParams;
+    myParams.damping = 0.5f;
+    myParams.roomSize = 0.5f;
+    myParams.wetLevel = 0.5f;
+    myParams.dryLevel = 0.5f;
+    myParams.width = 0.5f;
+    myParams.freezeMode = 0.25f;
+    myReverb.setParameters(myParams);
+    myReverb.process(myProcess);
 
     /*WavAudioFormat format;
     std::unique_ptr<AudioFormatWriter> writer;
@@ -169,6 +194,9 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
             }
         }
     }
+}
+
+void MainComponent::process() {
 }
 
 void MainComponent::openButtonClicked()
