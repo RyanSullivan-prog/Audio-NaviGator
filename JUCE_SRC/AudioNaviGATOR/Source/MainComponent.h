@@ -9,7 +9,7 @@ using namespace juce;
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent  : public juce::AudioAppComponent, private juce::Slider::Listener, private juce::ChangeListener, private juce::Timer
+class MainComponent : public juce::AudioAppComponent, private juce::Slider::Listener, private juce::ChangeListener, private juce::Timer
 {
 public:
     //==============================================================================
@@ -17,12 +17,12 @@ public:
     ~MainComponent() override;
 
     //==============================================================================
-    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
-    void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override;
+    void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
+    void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) override;
     void releaseResources() override;
 
     //==============================================================================
-    void paint (juce::Graphics& g) override;
+    void paint(juce::Graphics& g) override;
     void resized() override;
 
     void paintIfNoFileLoaded(juce::Graphics& g, const juce::Rectangle<int>& thumbnailBounds);
@@ -41,7 +41,7 @@ private:
     };
 
     TransportState state;
-    
+
     void openButtonClicked();
 
     void loadStems();
@@ -60,26 +60,30 @@ private:
 
     void songButtonClicked();
 
-    void newSongButtonClicked();
-
     void transportStateChanged(TransportState newState);
 
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
     void sliderValueChanged(juce::Slider* slider) override;
+
+
     void timerCallback() override;
+
+    std::unique_ptr<juce::FileChooser> chooser;
 
     AudioFormatManager formatManager;
 
-    std::unique_ptr<juce::FileChooser> chooser;
-    std::vector<juce::File> files;
-    std::unique_ptr<AudioTransportSource> transports;
+    std::unique_ptr<AudioFormatReaderSource> readerSource;
+    //std::vector<std::unique_ptr<AudioFormatReaderSource>> readers;
+
+    AudioTransportSource transport;
     std::vector<std::unique_ptr<AudioTransportSource>> transports;
-    std::vector<std::unique_ptr<AudioFormatReaderSource>> readers;
-    std::unique_ptr<juce::MixerAudioSource> mixer;
-    juce::AudioSourcePlayer ASP;
+
+    juce::MixerAudioSource mixer;
 
     std::string myPathToInstruments;
+
     std::string originalFilePath;
+
     juce::File originalFile;
 
     TextButton openButton;
@@ -90,7 +94,6 @@ private:
     TextButton vocalsButton;
     TextButton otherButton;
     TextButton songButton;
-    TextButton newSongButton;
 
     AudioThumbnailCache thumbnailCache;
     AudioThumbnail thumbnail;
@@ -98,5 +101,5 @@ private:
     juce::Slider scrubSlider;
     juce::Label scrubLabel;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
