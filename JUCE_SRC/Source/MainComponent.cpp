@@ -7,7 +7,7 @@ using namespace juce;
 // dials created using https://www.youtube.com/watch?v=po46y8UKPOY
 
 //==============================================================================
-MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton("Play"), stopButton("Stop"), bassButton("Bass"), drumsButton("Drums"), vocalsButton("Vocals"), otherButton("Other"), songButton("Full Song"), thumbnailCache(5), thumbnail(512, formatManager, thumbnailCache)
+MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton("Play"), stopButton("Stop"), bassButton("Bass"), drumsButton("Drums"), vocalsButton("Vocals"), otherButton("Other"), songButton("Full Song"), sliderButton("Start effect"), thumbnailCache(5), thumbnail(512, formatManager, thumbnailCache)
 {
     // Make sure you set the size of the component after
     // you add any child components.
@@ -50,6 +50,11 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
     songButton.setEnabled(false);
     addAndMakeVisible(&songButton);
 
+    sliderButton.onClick = [this] {sliderButtonClicked(); };
+    sliderButton.setColour(TextButton::buttonColourId, Colours::blue);
+    sliderButton.setEnabled(false);
+    addAndMakeVisible(&sliderButton);
+
     myPathToInstruments = "";
     originalFilePath = "";
 
@@ -73,6 +78,17 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
     stopTimeSlider.setRange(0.0, 1.0);
     stopTimeSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 100, 20);
     addAndMakeVisible(&stopTimeSlider);
+
+    addAndMakeVisible(&scrubSlider);
+
+    scrubSlider.setRange(0, 1);
+
+    scrubSlider.setTextBoxStyle(Slider::TextEntryBoxPosition::NoTextBox, true, -1, -1);
+
+    scrubSlider.setSliderStyle(Slider::SliderStyle::LinearHorizontal);
+
+    scrubSlider.addListener(this);
+
 
 
     formatManager.registerBasicFormats();
@@ -148,7 +164,7 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
         auto* buffer = bufferToFill.buffer->getWritePointer(channel, bufferToFill.startSample);
         for (auto sample = 0; sample < bufferToFill.numSamples; ++sample) {
             audioPosition = (float)transport.getCurrentPosition();
-            if (audioPosition > 5.0 && audioPosition < 10.0) {
+            if (audioPosition >= startEffect && audioPosition <= stopEffect) {
                 buffer[sample] = buffer[sample] * levelScale - currentLevel;
             }
         }
@@ -190,6 +206,8 @@ void MainComponent::openButtonClicked()
         myBass = temp.getChildFile("bass_" + fc.getResult().getFileNameWithoutExtension().toStdString() + ".wav");
         myDrums = temp.getChildFile("drums_" + fc.getResult().getFileNameWithoutExtension().toStdString() + ".wav");
         myOther = temp.getChildFile("other_" + fc.getResult().getFileNameWithoutExtension().toStdString() + ".wav");
+
+        sliderButton.setEnabled(true);
 
         if (!(myVocals.exists() && myBass.exists() && myDrums.exists() && myOther.exists())) {
             system(myPython.c_str());
@@ -254,8 +272,12 @@ void MainComponent::openButtonClicked()
                 stopButton.setEnabled(false);
                 thumbnail.setSource(new juce::FileInputSource(file));
                 playSource.reset(newSource.release());                                          // [14]
+                scrubSlider.setRange(0, transport.getLengthInSeconds());
                 startTimeSlider.setRange(0.0, transport.getLengthInSeconds());
                 stopTimeSlider.setRange(0.0, transport.getLengthInSeconds());
+                startEffect = 0.0f;
+                stopEffect = 0.0f;
+                sliderButton.setButtonText("Start effect");
             }
         }
     });
@@ -264,7 +286,6 @@ void MainComponent::openButtonClicked()
 void MainComponent::playButtonClicked()
 {
     if (state == Starting) {
-        transport.setPosition(startTimeSlider.getValue());
         transportStateChanged(Pausing);
     }
     else {
@@ -303,6 +324,9 @@ void MainComponent::bassButtonClicked()
             playSource.reset(newSource.release());          
             startTimeSlider.setRange(0.0, transport.getLengthInSeconds());
             stopTimeSlider.setRange(0.0, transport.getLengthInSeconds());
+            startEffect = 0.0f;
+            stopEffect = 0.0f;
+            sliderButton.setButtonText("Start effect");
         }
     }
 }
@@ -329,6 +353,9 @@ void MainComponent::drumsButtonClicked()
             playSource.reset(newSource.release());
             startTimeSlider.setRange(0.0, transport.getLengthInSeconds());
             stopTimeSlider.setRange(0.0, transport.getLengthInSeconds());
+            startEffect = 0.0f;
+            stopEffect = 0.0f;
+            sliderButton.setButtonText("Start effect");
         }
     }
 }
@@ -356,6 +383,9 @@ void MainComponent::vocalsButtonClicked()
             playSource.reset(newSource.release());
             startTimeSlider.setRange(0.0, transport.getLengthInSeconds());
             stopTimeSlider.setRange(0.0, transport.getLengthInSeconds());
+            startEffect = 0.0f;
+            stopEffect = 0.0f;
+            sliderButton.setButtonText("Start effect");
         }
     }
 }
@@ -382,6 +412,9 @@ void MainComponent::otherButtonClicked()
             playSource.reset(newSource.release());
             startTimeSlider.setRange(0.0, transport.getLengthInSeconds());
             stopTimeSlider.setRange(0.0, transport.getLengthInSeconds());
+            startEffect = 0.0f;
+            stopEffect = 0.0f;
+            sliderButton.setButtonText("Start effect");
         }
     }
 }
@@ -409,7 +442,21 @@ void MainComponent::songButtonClicked()
             playSource.reset(newSource.release());
             startTimeSlider.setRange(0.0, transport.getLengthInSeconds());
             stopTimeSlider.setRange(0.0, transport.getLengthInSeconds());
+            startEffect = 0.0f;
+            stopEffect = 0.0f;
+            sliderButton.setButtonText("Start effect");
         }
+    }
+}
+
+void MainComponent::sliderButtonClicked() {
+    if (sliderButton.getButtonText().equalsIgnoreCase("Start effect")) {
+        sliderButton.setButtonText("Stop effect");
+        startEffect = scrubSlider.getValue();
+    }
+    else {
+        sliderButton.setButtonText("Start effect");
+        stopEffect = scrubSlider.getValue();
     }
 }
 
@@ -456,8 +503,13 @@ void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source) {
         repaint();
 }
 
+void MainComponent::sliderValueChanged(juce::Slider* slider) {
+    if (slider->isMouseButtonDown()) { transport.setPosition(scrubSlider.getValue()); }
+}
+
 void MainComponent::timerCallback() {
     repaint();
+    scrubSlider.setValue(transport.getCurrentPosition());
 }
 
 void MainComponent::releaseResources()
@@ -485,6 +537,16 @@ void MainComponent::paint (juce::Graphics& g)
 
         g.setColour(juce::Colours::green);
         g.drawLine(drawPosition, 350.0f, drawPosition, (float)getHeight()-30, 2.0f);
+        if (startEffect != 0.0f) {
+            g.setColour(juce::Colours::blue);
+            drawPosition = (startEffect / duration) * (float)thumbnailBounds.getWidth() + 10;
+            g.drawLine(drawPosition, 350.0f, drawPosition, (float)getHeight() - 30, 2.0f);
+        }
+        if (stopEffect != 0.0f) {
+            g.setColour(juce::Colours::red);
+            drawPosition = (stopEffect / duration) * (float)thumbnailBounds.getWidth() + 10;
+            g.drawLine(drawPosition, 350.0f, drawPosition, (float)getHeight() - 30, 2.0f);
+        }
         if ((float)transport.getCurrentPosition() >= duration) {
             transportStateChanged(Stopped);
         }
@@ -516,8 +578,11 @@ void MainComponent::resized()
     vocalsButton.setBounds(10, 210, getWidth() - 20, 30);
     otherButton.setBounds(10, 250, getWidth() - 20, 30);
     songButton.setBounds(10, 290, getWidth() - 20, 30);
-    decibelSlider.setBounds((getWidth() - 20) / 2 + 10, 320, (getWidth() - 20) / 2, getHeight() - 380);
-    startTimeSlider.setBounds((getWidth() - 20) / 2 + 10, 350, (getWidth() - 20) / 2, getHeight() - 380);
+    decibelSlider.setBounds((getWidth() - 20) / 2 + 10, 320, (getWidth() - 20) / 2, 20);
+    //startTimeSlider.setBounds((getWidth() - 20) / 2 + 10, 350, (getWidth() - 20) / 2, getHeight() - 380);
+    auto sliderLeft = 0;
+    scrubSlider.setBounds(sliderLeft, 330, getWidth(), 20);
+    sliderButton.setBounds((getWidth() - 20) / 2 + 10, 350, (getWidth() - 20) / 2, 30);
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.

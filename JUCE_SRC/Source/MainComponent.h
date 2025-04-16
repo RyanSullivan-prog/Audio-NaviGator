@@ -9,7 +9,7 @@ using namespace juce;
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent  : public juce::AudioAppComponent, private juce::ChangeListener, private juce::Timer
+class MainComponent  : public juce::AudioAppComponent, private juce::Slider::Listener, private juce::ChangeListener, private juce::Timer
 {
 public:
     //==============================================================================
@@ -57,10 +57,14 @@ private:
     void otherButtonClicked();
 
     void songButtonClicked();
+    
+    void sliderButtonClicked();
 
     void transportStateChanged(TransportState newState);
 
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
+
+    void sliderValueChanged(juce::Slider* slider) override;
 
     void timerCallback() override;
 
@@ -88,6 +92,7 @@ private:
     TextButton vocalsButton;
     TextButton otherButton;
     TextButton songButton;
+    TextButton sliderButton;
 
     AudioThumbnailCache thumbnailCache;
     AudioThumbnail thumbnail;
@@ -106,6 +111,12 @@ private:
     juce::File myDrums;
 
     float level = 0.0f;
+
+    float startEffect = 0.0f;
+    float stopEffect = 0.0f;
+
+    juce::Slider scrubSlider;
+    juce::Label scrubLabel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
