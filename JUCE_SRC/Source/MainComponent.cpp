@@ -535,10 +535,10 @@ void MainComponent::paint (juce::Graphics& g)
         auto audioPosition = (float)transport.getCurrentPosition();
         auto drawPosition = (audioPosition / duration) * (float)thumbnailBounds.getWidth() + 10;
 
-        g.setColour(juce::Colours::green);
+        g.setColour(juce::Colours::blue);
         g.drawLine(drawPosition, 350.0f, drawPosition, (float)getHeight()-30, 2.0f);
         if (startEffect != 0.0f) {
-            g.setColour(juce::Colours::blue);
+            g.setColour(juce::Colours::green);
             drawPosition = (startEffect / duration) * (float)thumbnailBounds.getWidth() + 10;
             g.drawLine(drawPosition, 350.0f, drawPosition, (float)getHeight() - 30, 2.0f);
         }
