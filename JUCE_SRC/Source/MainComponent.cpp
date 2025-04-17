@@ -94,6 +94,8 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
 
     scrubSlider.addListener(this);
 
+    scrubSlider.setAlpha(0);
+
 
 
     formatManager.registerBasicFormats();
@@ -294,7 +296,7 @@ void MainComponent::stopButtonClicked()
 
 void MainComponent::parseButtonClicked()
 {
-    transportStateChanged(Stopped);
+    transportStateChanged(Stopping);
     if (!(myVocals.exists() && myBass.exists() && myDrums.exists() && myOther.exists())) {
         system(myPython.c_str());
     }
@@ -598,7 +600,7 @@ void MainComponent::resized()
     decibelSlider.setBounds((getWidth() - 20) / 2 + 10, 320, (getWidth() - 20) / 2, 20);
     //startTimeSlider.setBounds((getWidth() - 20) / 2 + 10, 350, (getWidth() - 20) / 2, getHeight() - 380);
     auto sliderLeft = 0;
-    scrubSlider.setBounds(sliderLeft, 330, getWidth(), 20);
+    scrubSlider.setBounds(sliderLeft, 350, (getWidth()+20)/2, getHeight() - 380);
     sliderButton.setBounds((getWidth() - 20) / 2 + 10, 350, (getWidth() - 20) / 2, 30);
     parseButton.setBounds((getWidth() - 20) / 2 + 10, 380, (getWidth() - 20) / 2, 30);
     // This is called when the MainContentComponent is resized.
