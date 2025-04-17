@@ -96,7 +96,8 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
 
     scrubSlider.setAlpha(0);
 
-
+    decibelLabel.setText("Noise Level in dB", juce::dontSendNotification);
+    addAndMakeVisible(&decibelLabel);
 
     formatManager.registerBasicFormats();
     thumbnail.addChangeListener(this);
@@ -597,12 +598,13 @@ void MainComponent::resized()
     vocalsButton.setBounds(10, 210, getWidth() - 20, 30);
     otherButton.setBounds(10, 250, getWidth() - 20, 30);
     songButton.setBounds(10, 290, getWidth() - 20, 30);
-    decibelSlider.setBounds((getWidth() - 20) / 2 + 10, 320, (getWidth() - 20) / 2, 20);
+    decibelSlider.setBounds((getWidth() - 20) / 2 + 20, 350, (getWidth() - 30) / 2, 30);
     //startTimeSlider.setBounds((getWidth() - 20) / 2 + 10, 350, (getWidth() - 20) / 2, getHeight() - 380);
     auto sliderLeft = 0;
     scrubSlider.setBounds(sliderLeft, 350, (getWidth()+20)/2, getHeight() - 380);
-    sliderButton.setBounds((getWidth() - 20) / 2 + 10, 350, (getWidth() - 20) / 2, 30);
-    parseButton.setBounds((getWidth() - 20) / 2 + 10, 380, (getWidth() - 20) / 2, 30);
+    sliderButton.setBounds((getWidth() - 20) / 2 + 20, 390, (getWidth() - 30) / 2, 30);
+    parseButton.setBounds((getWidth() - 20) / 2 + 20, 430, (getWidth() - 30) / 2, 30);
+    decibelLabel.setBounds((getWidth() - 20) / 2 + 25, 330, (getWidth() - 30) / 2, 30);
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.

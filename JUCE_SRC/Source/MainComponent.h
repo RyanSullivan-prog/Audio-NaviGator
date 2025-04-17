@@ -97,6 +97,8 @@ private:
     TextButton sliderButton;
     TextButton parseButton;
 
+    Label decibelLabel;
+
     AudioThumbnailCache thumbnailCache;
     AudioThumbnail thumbnail;
 
