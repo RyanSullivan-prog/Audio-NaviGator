@@ -5,9 +5,10 @@ using namespace juce;
 // file selecter and audio player created using https://docs.juce.com/master/tutorial_playing_sound_files.html, https://www.youtube.com/watch?v=eB6S8iWvx2k, and https://www.youtube.com/watch?v=vVnu-L712ho
 // Audio thumbnail created using https://juce.com/tutorials/tutorial_audio_thumbnail/
 // dials created using https://www.youtube.com/watch?v=po46y8UKPOY
+// combobox created using https://juce.com/tutorials/tutorial_combo_box/
 
 //==============================================================================
-MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton("Play"), stopButton("Stop"), bassButton("Bass"), drumsButton("Drums"), vocalsButton("Vocals"), otherButton("Other"), songButton("Full Song"), sliderButton("Start effect"), parseButton("Parse Song"), thumbnailCache(5), thumbnail(512, formatManager, thumbnailCache)
+MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton("Play"), stopButton("Stop"), bassButton("Bass"), drumsButton("Drums"), vocalsButton("Vocals"), otherButton("Other"), songButton("Full Song"), sliderButton("Start effect"), parseButton("Parse Song"), saveButton("Apply Effects and Save"), thumbnailCache(5), thumbnail(512, formatManager, thumbnailCache)
 {
     // Make sure you set the size of the component after
     // you add any child components.
@@ -60,6 +61,23 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
     parseButton.setEnabled(false);
     addAndMakeVisible(&parseButton);
 
+    saveButton.onClick = [this] {saveButtonClicked(); };
+    saveButton.setColour(TextButton::buttonColourId, Colours::blue);
+    saveButton.setEnabled(false);
+    addAndMakeVisible(&saveButton);
+
+    addAndMakeVisible(&textLabel);
+    textLabel.setFont(textFont);
+    addAndMakeVisible(&styleMenu);
+    styleMenu.addItem("Room Size", room_size);
+    styleMenu.addItem("Damping", damping);
+    styleMenu.addItem("Wet Level", wet_level);
+    styleMenu.addItem("Dry Level", dry_level);
+    styleMenu.addItem("Width", width);
+    styleMenu.addItem("Freeze Mode", freeze_mode);
+    styleMenu.onChange = [this] { styleMenuChanged(); };
+    styleMenu.setSelectedId(room_size);
+
     myPathToInstruments = "";
     originalFilePath = "";
 
@@ -68,6 +86,7 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
     myVocals = File();
     myOther = File();
     myDrums = File();
+    currentFile = File();
 
     //decibelSlider.setSliderStyle(Slider::SliderStyle::LinearBar);
     decibelSlider.setRange(-80, 35);
@@ -98,6 +117,12 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
 
     decibelLabel.setText("Noise Level in dB", juce::dontSendNotification);
     addAndMakeVisible(&decibelLabel);
+
+    ReverbDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
+    ReverbDial.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxRight, 70, 70, 70);
+    ReverbDial.setRange(0, 1.0);
+    ReverbDial.setValue(0.5);
+    addAndMakeVisible(&ReverbDial);
 
     formatManager.registerBasicFormats();
     thumbnail.addChangeListener(this);
@@ -193,6 +218,8 @@ void MainComponent::openButtonClicked()
 
             originalFile = file;
 
+            currentFile = file;
+
             std::string originalFilePath = (fc.getResult().getFullPathName().toStdString());
 
             juce::File temp = temp.getCurrentWorkingDirectory();
@@ -213,9 +240,6 @@ void MainComponent::openButtonClicked()
             myBass = temp.getChildFile("bass_" + fc.getResult().getFileNameWithoutExtension().toStdString() + ".wav");
             myDrums = temp.getChildFile("drums_" + fc.getResult().getFileNameWithoutExtension().toStdString() + ".wav");
             myOther = temp.getChildFile("other_" + fc.getResult().getFileNameWithoutExtension().toStdString() + ".wav");
-
-            sliderButton.setEnabled(true);
-            parseButton.setEnabled(true);
 
             // if using forward slash operating system use forward slashes, else backslash
            /* if (originalFilePath.find("/") != std::string::npos) {
@@ -265,8 +289,6 @@ void MainComponent::openButtonClicked()
                     thumbnail.setSource(new juce::FileInputSource(file));
                     playSource.reset(newSource.release());                                          // [14]
                     scrubSlider.setRange(0, transport.getLengthInSeconds());
-                    startTimeSlider.setRange(0.0, transport.getLengthInSeconds());
-                    stopTimeSlider.setRange(0.0, transport.getLengthInSeconds());
                     startEffect = 0.0f;
                     stopEffect = 0.0f;
                     sliderButton.setButtonText("Start effect");
@@ -274,6 +296,9 @@ void MainComponent::openButtonClicked()
                     drumsButton.setEnabled(false);
                     vocalsButton.setEnabled(false);
                     otherButton.setEnabled(false);
+                    sliderButton.setEnabled(true);
+                    parseButton.setEnabled(true);
+                    saveButton.setEnabled(true);
                 }
             }
         });
@@ -321,15 +346,15 @@ void MainComponent::parseButtonClicked()
 
 void MainComponent::bassButtonClicked()
 {
-    juce::File temp = juce::File(myBass.getFullPathName().toStdString());
-    DBG(temp.getFullPathName().toStdString());
-    if (temp != juce::File{})
+    if (myBass != juce::File{})
     {
-        auto* reader = formatManager.createReaderFor(temp);
+        auto* reader = formatManager.createReaderFor(myBass);
+
+        currentFile = myBass;
 
         if (reader != nullptr)
         {
-            DBG("Past reader nullptr");
+            currentFile = myBass;
             auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
             transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
             playButton.setEnabled(true);
@@ -340,7 +365,7 @@ void MainComponent::bassButtonClicked()
             vocalsButton.setEnabled(true);
             otherButton.setEnabled(true);
             transportStateChanged(Stopped);
-            thumbnail.setSource(new juce::FileInputSource(temp));
+            thumbnail.setSource(new juce::FileInputSource(myBass));
             playSource.reset(newSource.release());
             startTimeSlider.setRange(0.0, transport.getLengthInSeconds());
             stopTimeSlider.setRange(0.0, transport.getLengthInSeconds());
@@ -359,6 +384,7 @@ void MainComponent::drumsButtonClicked()
 
         if (reader != nullptr)
         {
+            currentFile = myDrums;
             auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
             transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
             playButton.setEnabled(true);
@@ -389,6 +415,7 @@ void MainComponent::vocalsButtonClicked()
 
         if (reader != nullptr)
         {
+            currentFile = myVocals;
             auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
             transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
             playButton.setEnabled(true);
@@ -418,6 +445,7 @@ void MainComponent::otherButtonClicked()
 
         if (reader != nullptr)
         {
+            currentFile = myOther;
             auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
             transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
             playButton.setEnabled(true);
@@ -447,7 +475,7 @@ void MainComponent::songButtonClicked()
 
         if (reader != nullptr)
         {
-            DBG("Past reader check");
+            currentFile = originalFile;
             auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
             transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
             playButton.setEnabled(true);
@@ -460,8 +488,6 @@ void MainComponent::songButtonClicked()
             transportStateChanged(Stopped);
             thumbnail.setSource(new juce::FileInputSource(originalFile));
             playSource.reset(newSource.release());
-            startTimeSlider.setRange(0.0, transport.getLengthInSeconds());
-            stopTimeSlider.setRange(0.0, transport.getLengthInSeconds());
             startEffect = 0.0f;
             stopEffect = 0.0f;
             sliderButton.setButtonText("Start effect");
@@ -478,6 +504,90 @@ void MainComponent::sliderButtonClicked() {
         sliderButton.setButtonText("Start effect");
         stopEffect = scrubSlider.getValue();
     }
+}
+
+void MainComponent::saveButtonClicked() {
+    DBG("Saved");
+    switch (prevId) {
+        case room_size:
+            myRoomSize = ReverbDial.getValue();
+            break;
+        case damping:
+            myDamping = ReverbDial.getValue();
+            break;
+        case wet_level:
+            myWetLevel = ReverbDial.getValue();
+            break;
+        case dry_level:
+            myDryLevel = ReverbDial.getValue();
+            break;
+        case width:
+            myWidth = ReverbDial.getValue();
+            break;
+        case freeze_mode:
+            myFreezeMode = ReverbDial.getValue();
+            break;
+    }
+    std::string myEffects = "python main.py \"" + currentFile.getFullPathName().toStdString() + "\" " + std::to_string(myRoomSize) + " " + std::to_string(myDamping) + " " + std::to_string(myWetLevel) + " " + std::to_string(myDryLevel) + " " + std::to_string(myWidth) + " " + std::to_string(myFreezeMode);
+    DBG("Passing " + myEffects);
+    system(myEffects.c_str());
+}
+
+void MainComponent::styleMenuChanged() {
+    switch (prevId) {
+        case room_size:
+            myRoomSize = ReverbDial.getValue();
+            break;
+        case damping:
+            myDamping = ReverbDial.getValue();
+            break;
+        case wet_level:
+            myWetLevel = ReverbDial.getValue();
+            break;
+        case dry_level:
+            myDryLevel = ReverbDial.getValue();
+            break;
+        case width:
+            myWidth = ReverbDial.getValue();
+            break;
+        case freeze_mode:
+            myFreezeMode = ReverbDial.getValue();
+            break;
+    }
+    switch (styleMenu.getSelectedId())
+    {
+        case room_size:
+            DBG("Room size selected");
+            ReverbDial.setValue(myRoomSize);
+            prevId = room_size;
+            break;
+        case damping:
+            DBG("Damping selected");
+            ReverbDial.setValue(myDamping);
+            prevId = damping;
+            break;
+        case wet_level:
+            DBG("Wet level selected");
+            ReverbDial.setValue(myWetLevel);
+            prevId = wet_level;
+            break;
+        case dry_level:
+            DBG("Dry Level selected");
+            ReverbDial.setValue(myDryLevel);
+            prevId = dry_level;
+            break;
+        case width:
+            DBG("Width selected");
+            ReverbDial.setValue(myWidth);
+            prevId = width;
+            break;
+        case freeze_mode:
+            DBG("Freeze Mode selected");
+            ReverbDial.setValue(myFreezeMode);
+            prevId = freeze_mode;
+            break;
+    }
+    textLabel.setFont(textFont);
 }
 
 void MainComponent::transportStateChanged(TransportState newState)
@@ -599,12 +709,13 @@ void MainComponent::resized()
     otherButton.setBounds(10, 250, getWidth() - 20, 30);
     songButton.setBounds(10, 290, getWidth() - 20, 30);
     decibelSlider.setBounds((getWidth() - 20) / 2 + 20, 350, (getWidth() - 30) / 2, 30);
-    //startTimeSlider.setBounds((getWidth() - 20) / 2 + 10, 350, (getWidth() - 20) / 2, getHeight() - 380);
-    auto sliderLeft = 0;
-    scrubSlider.setBounds(sliderLeft, 350, (getWidth()+20)/2, getHeight() - 380);
+    scrubSlider.setBounds(0, 350, (getWidth()+20)/2, getHeight() - 380);
     sliderButton.setBounds((getWidth() - 20) / 2 + 20, 390, (getWidth() - 30) / 2, 30);
     parseButton.setBounds((getWidth() - 20) / 2 + 20, 430, (getWidth() - 30) / 2, 30);
     decibelLabel.setBounds((getWidth() - 20) / 2 + 25, 330, (getWidth() - 30) / 2, 30);
+    ReverbDial.setBounds((getWidth() - 20) / 2 + 20, 470, (getWidth() - 30) / 2, 100);
+    styleMenu.setBounds((getWidth() - 20) / 2 + 20, 570, (getWidth() - 30) / 2, 30);
+    saveButton.setBounds((getWidth() - 20) / 2 + 20, 610, (getWidth() - 30) / 2, 30);
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.

@@ -62,6 +62,8 @@ private:
 
     void parseButtonClicked();
 
+    void saveButtonClicked();
+
     void transportStateChanged(TransportState newState);
 
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
@@ -96,13 +98,14 @@ private:
     TextButton songButton;
     TextButton sliderButton;
     TextButton parseButton;
+    TextButton saveButton;
 
     Label decibelLabel;
 
     AudioThumbnailCache thumbnailCache;
     AudioThumbnail thumbnail;
 
-    Slider dial1;
+    Slider ReverbDial;
 
     Slider decibelSlider;
 
@@ -114,6 +117,7 @@ private:
     juce::File myBass;
     juce::File myOther;
     juce::File myDrums;
+    juce::File currentFile;
 
     float level = 0.0f;
 
@@ -124,6 +128,29 @@ private:
     juce::Label scrubLabel;
 
     std::string myPython = "";
+
+    juce::Label textLabel { {}, "My Reverb"};
+    juce::Font textFont{ 12.0f };
+    juce::ComboBox styleMenu;
+    void styleMenuChanged();
+
+    enum ReverbEffects {
+        room_size = 1,
+        damping,
+        wet_level,
+        dry_level,
+        width,
+        freeze_mode,
+        numberOfStyles
+    };
+
+    float myRoomSize = 0.5;
+    float myDamping = 0.5;
+    float myWetLevel = 0.33;
+    float myDryLevel = 0.4;
+    float myWidth = 1.0;
+    float myFreezeMode = 0.0;
+    int prevId = 1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
