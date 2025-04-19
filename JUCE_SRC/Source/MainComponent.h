@@ -48,16 +48,6 @@ private:
 
     void stopButtonClicked();
 
-    void bassButtonClicked();
-
-    void drumsButtonClicked();
-
-    void vocalsButtonClicked();
-
-    void otherButtonClicked();
-
-    void songButtonClicked();
-
     void sliderButtonClicked();
 
     void parseButtonClicked();
@@ -91,11 +81,6 @@ private:
     TextButton openButton;
     TextButton playButton;
     TextButton stopButton;
-    TextButton bassButton;
-    TextButton drumsButton;
-    TextButton vocalsButton;
-    TextButton otherButton;
-    TextButton songButton;
     TextButton sliderButton;
     TextButton parseButton;
     TextButton saveButton;

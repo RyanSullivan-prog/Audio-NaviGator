@@ -8,7 +8,7 @@ using namespace juce;
 // combobox created using https://juce.com/tutorials/tutorial_combo_box/
 
 //==============================================================================
-MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton("Play"), stopButton("Stop"), bassButton("Bass"), drumsButton("Drums"), vocalsButton("Vocals"), otherButton("Other"), songButton("Full Song"), sliderButton("Start effect"), parseButton("Parse Song"), saveButton("Apply Effects and Save"), thumbnailCache(5), thumbnail(512, formatManager, thumbnailCache)
+MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton("Play"), stopButton("Stop"), sliderButton("Start effect"), parseButton("Parse Song"), saveButton("Apply Effects and Save"), thumbnailCache(5), thumbnail(512, formatManager, thumbnailCache)
 {
     // Make sure you set the size of the component after
     // you add any child components.
@@ -25,31 +25,6 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
     stopButton.setColour(TextButton::buttonColourId, Colours::red);
     stopButton.setEnabled(false);
     addAndMakeVisible(&stopButton);
-
-    bassButton.onClick = [this] {bassButtonClicked(); };
-    bassButton.setColour(TextButton::buttonColourId, Colours::blue);
-    bassButton.setEnabled(false);
-    addAndMakeVisible(&bassButton);
-
-    drumsButton.onClick = [this] {drumsButtonClicked(); };
-    drumsButton.setColour(TextButton::buttonColourId, Colours::blue);
-    drumsButton.setEnabled(false);
-    addAndMakeVisible(&drumsButton);
-
-    vocalsButton.onClick = [this] {vocalsButtonClicked(); };
-    vocalsButton.setColour(TextButton::buttonColourId, Colours::blue);
-    vocalsButton.setEnabled(false);
-    addAndMakeVisible(&vocalsButton);
-
-    otherButton.onClick = [this] {otherButtonClicked(); };
-    otherButton.setColour(TextButton::buttonColourId, Colours::blue);
-    otherButton.setEnabled(false);
-    addAndMakeVisible(&otherButton);
-
-    songButton.onClick = [this] {songButtonClicked(); };
-    songButton.setColour(TextButton::buttonColourId, Colours::blue);
-    songButton.setEnabled(false);
-    addAndMakeVisible(&songButton);
 
     sliderButton.onClick = [this] {sliderButtonClicked(); };
     sliderButton.setColour(TextButton::buttonColourId, Colours::blue);
@@ -315,10 +290,6 @@ void MainComponent::openButtonClicked()
                     startEffect = 0.0f;
                     stopEffect = 0.0f;
                     sliderButton.setButtonText("Start effect");
-                    bassButton.setEnabled(false);
-                    drumsButton.setEnabled(false);
-                    vocalsButton.setEnabled(false);
-                    otherButton.setEnabled(false);
                     sliderButton.setEnabled(true);
                     parseButton.setEnabled(true);
                     saveButton.setEnabled(true);
@@ -350,165 +321,15 @@ void MainComponent::parseButtonClicked()
         system(myPython.c_str());
     }
     if (myVocals.exists() && myBass.exists() && myDrums.exists() && myOther.exists()) {
-        bassButton.setEnabled(true);
-        drumsButton.setEnabled(true);
-        vocalsButton.setEnabled(true);
-        otherButton.setEnabled(true);
         instrumentMenu.setEnabled(true);
     }
     else {
-        bassButton.setEnabled(false);
-        drumsButton.setEnabled(false);
-        vocalsButton.setEnabled(false);
-        otherButton.setEnabled(false);
+        instrumentMenu.setEnabled(false);
     }
     parseButton.setEnabled(false);
     startEffect = 0.0f;
     stopEffect = 0.0f;
     sliderButton.setButtonText("Start effect");
-}
-
-void MainComponent::bassButtonClicked()
-{
-    if (myBass != juce::File{})
-    {
-        auto* reader = formatManager.createReaderFor(myBass);
-
-        currentFile = myBass;
-
-        if (reader != nullptr)
-        {
-            currentFile = myBass;
-            auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
-            transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
-            playButton.setEnabled(true);
-            stopButton.setEnabled(false);
-            songButton.setEnabled(true);
-            bassButton.setEnabled(false);
-            drumsButton.setEnabled(true);
-            vocalsButton.setEnabled(true);
-            otherButton.setEnabled(true);
-            transportStateChanged(Stopped);
-            thumbnail.setSource(new juce::FileInputSource(myBass));
-            playSource.reset(newSource.release());
-            startEffect = 0.0f;
-            stopEffect = 0.0f;
-            sliderButton.setButtonText("Start effect");
-        }
-    }
-}
-
-void MainComponent::drumsButtonClicked()
-{
-    if (myDrums != juce::File{})
-    {
-        auto* reader = formatManager.createReaderFor(myDrums);
-
-        if (reader != nullptr)
-        {
-            currentFile = myDrums;
-            auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
-            transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
-            playButton.setEnabled(true);
-            stopButton.setEnabled(false);
-            songButton.setEnabled(true);
-            bassButton.setEnabled(true);
-            drumsButton.setEnabled(false);
-            vocalsButton.setEnabled(true);
-            otherButton.setEnabled(true);
-            transportStateChanged(Stopped);
-            thumbnail.setSource(new juce::FileInputSource(myDrums));
-            playSource.reset(newSource.release());
-            startEffect = 0.0f;
-            stopEffect = 0.0f;
-            sliderButton.setButtonText("Start effect");
-        }
-    }
-}
-
-void MainComponent::vocalsButtonClicked()
-{
-
-    if (myVocals != juce::File{})
-    {
-        auto* reader = formatManager.createReaderFor(myVocals);
-
-        if (reader != nullptr)
-        {
-            currentFile = myVocals;
-            auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
-            transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
-            playButton.setEnabled(true);
-            stopButton.setEnabled(false);
-            songButton.setEnabled(true);
-            bassButton.setEnabled(true);
-            drumsButton.setEnabled(true);
-            vocalsButton.setEnabled(false);
-            otherButton.setEnabled(true);
-            transportStateChanged(Stopped);
-            thumbnail.setSource(new juce::FileInputSource(myVocals));
-            playSource.reset(newSource.release());
-            startEffect = 0.0f;
-            stopEffect = 0.0f;
-            sliderButton.setButtonText("Start effect");
-        }
-    }
-}
-
-void MainComponent::otherButtonClicked()
-{
-    if (myOther != juce::File{})
-    {
-        auto* reader = formatManager.createReaderFor(myOther);
-
-        if (reader != nullptr)
-        {
-            currentFile = myOther;
-            auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
-            transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
-            playButton.setEnabled(true);
-            stopButton.setEnabled(false);
-            songButton.setEnabled(true);
-            bassButton.setEnabled(true);
-            drumsButton.setEnabled(true);
-            vocalsButton.setEnabled(true);
-            otherButton.setEnabled(false);
-            transportStateChanged(Stopped);
-            thumbnail.setSource(new juce::FileInputSource(myOther));
-            playSource.reset(newSource.release());
-            startEffect = 0.0f;
-            stopEffect = 0.0f;
-            sliderButton.setButtonText("Start effect");
-        }
-    }
-}
-
-void MainComponent::songButtonClicked()
-{
-    if (originalFile != juce::File{})
-    {
-        auto* reader = formatManager.createReaderFor(originalFile);
-
-        if (reader != nullptr)
-        {
-            currentFile = originalFile;
-            auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
-            transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
-            playButton.setEnabled(true);
-            stopButton.setEnabled(false);
-            songButton.setEnabled(false);
-            bassButton.setEnabled(true);
-            drumsButton.setEnabled(true);
-            vocalsButton.setEnabled(true);
-            otherButton.setEnabled(true);
-            transportStateChanged(Stopped);
-            thumbnail.setSource(new juce::FileInputSource(originalFile));
-            playSource.reset(newSource.release());
-            startEffect = 0.0f;
-            stopEffect = 0.0f;
-            sliderButton.setButtonText("Start effect");
-        }
-    }
 }
 
 void MainComponent::sliderButtonClicked() {
