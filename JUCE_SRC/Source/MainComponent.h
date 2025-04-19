@@ -109,6 +109,8 @@ private:
 
     Slider ReverbDial;
 
+    Slider CompressionDial;
+
     Slider decibelSlider;
 
     Slider distortionSlider;
@@ -129,10 +131,11 @@ private:
 
     std::string myPython = "";
 
-    juce::Label textLabel { {}, "My Reverb"};
-    juce::Font textFont{ 12.0f };
-    juce::ComboBox styleMenu;
-    void styleMenuChanged();
+    juce::ComboBox reverbMenu;
+    void reverbMenuChanged();
+
+    juce::ComboBox compressionMenu;
+    void compressionMenuChanged();
 
     enum ReverbEffects {
         room_size = 1,
@@ -141,7 +144,14 @@ private:
         dry_level,
         width,
         freeze_mode,
-        numberOfStyles
+        numberOfReverb
+    };
+
+    enum CompressionEffects {
+        thresholdDB = numberOfReverb,
+        ratio,
+        attackMS,
+        releaseMS
     };
 
     float myRoomSize = 0.5;
@@ -150,7 +160,12 @@ private:
     float myDryLevel = 0.4;
     float myWidth = 1.0;
     float myFreezeMode = 0.0;
-    int prevId = 1;
+    float myThresholdDB = 0.0;
+    float myRatio = 1;
+    float myAttackMS = 1;
+    float myReleaseMS = 100;
+    int prevReverb = 1;
+    int prevCompression = thresholdDB;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

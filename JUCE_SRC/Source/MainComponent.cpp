@@ -66,17 +66,29 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
     saveButton.setEnabled(false);
     addAndMakeVisible(&saveButton);
 
-    addAndMakeVisible(&textLabel);
-    textLabel.setFont(textFont);
-    addAndMakeVisible(&styleMenu);
-    styleMenu.addItem("Room Size", room_size);
-    styleMenu.addItem("Damping", damping);
-    styleMenu.addItem("Wet Level", wet_level);
-    styleMenu.addItem("Dry Level", dry_level);
-    styleMenu.addItem("Width", width);
-    styleMenu.addItem("Freeze Mode", freeze_mode);
-    styleMenu.onChange = [this] { styleMenuChanged(); };
-    styleMenu.setSelectedId(room_size);
+    addAndMakeVisible(&reverbMenu);
+    reverbMenu.addItem("Room Size", room_size);
+    reverbMenu.addItem("Damping", damping);
+    reverbMenu.addItem("Wet Level", wet_level);
+    reverbMenu.addItem("Dry Level", dry_level);
+    reverbMenu.addItem("Width", width);
+    reverbMenu.addItem("Freeze Mode", freeze_mode);
+    reverbMenu.onChange = [this] { reverbMenuChanged(); };
+    reverbMenu.setSelectedId(room_size);
+
+    addAndMakeVisible(&compressionMenu);
+    compressionMenu.addItem("Threshold dB", thresholdDB);
+    compressionMenu.addItem("Ratio", ratio);
+    compressionMenu.addItem("Attack ms", attackMS);
+    compressionMenu.addItem("Release ms", releaseMS);
+    compressionMenu.onChange = [this] { compressionMenuChanged(); };
+    compressionMenu.setSelectedId(thresholdDB);
+
+    CompressionDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
+    CompressionDial.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 25);
+    CompressionDial.setRange(-60, 0.0);
+    CompressionDial.setValue(myThresholdDB);
+    addAndMakeVisible(&CompressionDial);
 
     myPathToInstruments = "";
     originalFilePath = "";
@@ -120,7 +132,7 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
 
 
     ReverbDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
-    ReverbDial.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxRight, 70, 70, 70);
+    ReverbDial.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 25);
     ReverbDial.setRange(0, 1.0);
     ReverbDial.setValue(0.5);
     addAndMakeVisible(&ReverbDial);
@@ -500,7 +512,7 @@ void MainComponent::sliderButtonClicked() {
 }
 
 void MainComponent::saveButtonClicked() {
-    switch (prevId) {
+    switch (prevReverb) {
         case room_size:
             myRoomSize = ReverbDial.getValue();
             break;
@@ -520,13 +532,27 @@ void MainComponent::saveButtonClicked() {
             myFreezeMode = ReverbDial.getValue();
             break;
     }
-    std::string myEffects = "python main.py \"" + currentFile.getFullPathName().toStdString() + "\" " + std::to_string(myRoomSize) + " " + std::to_string(myDamping) + " " + std::to_string(myWetLevel) + " " + std::to_string(myDryLevel) + " " + std::to_string(myWidth) + " " + std::to_string(myFreezeMode) + " " + std::to_string(decibelSlider.getValue()) + " " + std::to_string(startEffect) + " " + std::to_string(stopEffect) + " " + std::to_string(distortionSlider.getValue());
+    switch (prevCompression) {
+        case thresholdDB:
+            myThresholdDB = CompressionDial.getValue();
+            break;
+        case ratio:
+            myRatio = CompressionDial.getValue();
+            break;
+        case attackMS:
+            myAttackMS = CompressionDial.getValue();
+            break;
+        case releaseMS:
+            myReleaseMS = CompressionDial.getValue();
+            break;
+    }
+    std::string myEffects = "python main.py \"" + currentFile.getFullPathName().toStdString() + "\" " + std::to_string(myRoomSize) + " " + std::to_string(myDamping) + " " + std::to_string(myWetLevel) + " " + std::to_string(myDryLevel) + " " + std::to_string(myWidth) + " " + std::to_string(myFreezeMode) + " " + std::to_string(decibelSlider.getValue()) + " " + std::to_string(startEffect) + " " + std::to_string(stopEffect) + " " + std::to_string(distortionSlider.getValue()) + " " + std::to_string(myThresholdDB) + " " + std::to_string(myRatio) + " " + std::to_string(myAttackMS) + " " + std::to_string(myReleaseMS);
     system(myEffects.c_str());
     thumbnailCache.clear();
 }
 
-void MainComponent::styleMenuChanged() {
-    switch (prevId) {
+void MainComponent::reverbMenuChanged() {
+    switch (prevReverb) {
         case room_size:
             myRoomSize = ReverbDial.getValue();
             break;
@@ -546,34 +572,77 @@ void MainComponent::styleMenuChanged() {
             myFreezeMode = ReverbDial.getValue();
             break;
     }
-    switch (styleMenu.getSelectedId())
+    switch (reverbMenu.getSelectedId())
     {
         case room_size:
             ReverbDial.setValue(myRoomSize);
-            prevId = room_size;
+            prevReverb = room_size;
             break;
         case damping:
             ReverbDial.setValue(myDamping);
-            prevId = damping;
+            prevReverb = damping;
             break;
         case wet_level:
             ReverbDial.setValue(myWetLevel);
-            prevId = wet_level;
+            prevReverb = wet_level;
             break;
         case dry_level:
             ReverbDial.setValue(myDryLevel);
-            prevId = dry_level;
+            prevReverb = dry_level;
             break;
         case width:
             ReverbDial.setValue(myWidth);
-            prevId = width;
+            prevReverb = width;
             break;
         case freeze_mode:
             ReverbDial.setValue(myFreezeMode);
-            prevId = freeze_mode;
+            prevReverb = freeze_mode;
             break;
     }
-    textLabel.setFont(textFont);
+}
+
+void MainComponent::compressionMenuChanged() {
+        switch (prevCompression) {
+        case thresholdDB:
+            myThresholdDB = CompressionDial.getValue();
+            DBG(myThresholdDB);
+            break;
+        case ratio:
+            myRatio = CompressionDial.getValue();
+            DBG(myRatio);
+            break;
+        case attackMS:
+            myAttackMS = CompressionDial.getValue();
+            DBG(myAttackMS);
+            break;
+        case releaseMS:
+            myReleaseMS = CompressionDial.getValue();
+            DBG(myReleaseMS);
+            break;
+        }
+    switch (compressionMenu.getSelectedId())
+    {
+        case thresholdDB:
+            CompressionDial.setRange(-60, 0.0);
+            CompressionDial.setValue(myThresholdDB);
+            prevCompression = thresholdDB;
+            break;
+        case ratio:
+            CompressionDial.setRange(1, 15.0);
+            CompressionDial.setValue(myRatio);
+            prevCompression = ratio;
+            break;
+        case attackMS:
+            CompressionDial.setRange(0.01, 100);
+            CompressionDial.setValue(myAttackMS);
+            prevCompression = attackMS;
+            break;
+        case releaseMS:
+            CompressionDial.setRange(10, 4000);
+            CompressionDial.setValue(myReleaseMS);
+            prevCompression = releaseMS;
+            break;
+    }
 }
 
 void MainComponent::transportStateChanged(TransportState newState)
@@ -701,9 +770,11 @@ void MainComponent::resized()
     parseButton.setBounds((getWidth() - 20) / 2 + 20, 470, (getWidth() - 30) / 2, 30);
     decibelLabel.setBounds((getWidth() - 20) / 2 + 25, 330, (getWidth() - 30) / 2, 30);
     distortionLabel.setBounds((getWidth() - 20) / 2 + 25, 370, (getWidth() - 30) / 2, 30);
-    ReverbDial.setBounds((getWidth() - 20) / 2 + 20, 510, (getWidth() - 30) / 2, 100);
-    styleMenu.setBounds((getWidth() - 20) / 2 + 20, 610, (getWidth() - 30) / 2, 30);
-    saveButton.setBounds((getWidth() - 20) / 2 + 20, 640, (getWidth() - 30) / 2, 30);
+    ReverbDial.setBounds((getWidth() - 20) / 2 + 20, 510, 75, 100);
+    reverbMenu.setBounds((getWidth() - 20) / 2 + 20, 610, 125, 30);
+    CompressionDial.setBounds((getWidth() - 20) / 2 + 170, 510, 75, 100);
+    compressionMenu.setBounds((getWidth() - 20) / 2 + 170, 610, 125, 30);
+    saveButton.setBounds((getWidth() - 20) / 2 + 20, 650, (getWidth() - 30) / 2, 30);
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.
