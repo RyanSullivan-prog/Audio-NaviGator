@@ -581,7 +581,7 @@ void MainComponent::releaseResources()
 //==============================================================================
 void MainComponent::paint(juce::Graphics& g)
 {
-    juce::Rectangle<int> thumbnailBounds(10, 350, (getWidth() - 20) / 2, getHeight() - 380);
+    juce::Rectangle<int> thumbnailBounds(10, 210, (getWidth() - 20) / 2, getHeight() - 300);
     if (thumbnail.getNumChannels() == 0)
         paintIfNoFileLoaded(g, thumbnailBounds);
     else
@@ -594,16 +594,16 @@ void MainComponent::paint(juce::Graphics& g)
         auto drawPosition = (audioPosition / duration) * (float)thumbnailBounds.getWidth() + 10;
 
         g.setColour(juce::Colours::blue);
-        g.drawLine(drawPosition, 350.0f, drawPosition, (float)getHeight() - 30, 2.0f);
+        g.drawLine(drawPosition, 210, drawPosition, (float)getHeight() - 90, 2.0f);
         if (startEffect != 0.0f) {
             g.setColour(juce::Colours::green);
             drawPosition = (startEffect / duration) * (float)thumbnailBounds.getWidth() + 10;
-            g.drawLine(drawPosition, 350.0f, drawPosition, (float)getHeight() - 30, 2.0f);
+            g.drawLine(drawPosition, 210, drawPosition, (float)getHeight() - 90, 2.0f);
         }
         if (stopEffect != 0.0f) {
             g.setColour(juce::Colours::red);
             drawPosition = (stopEffect / duration) * (float)thumbnailBounds.getWidth() + 10;
-            g.drawLine(drawPosition, 350.0f, drawPosition, (float)getHeight() - 30, 2.0f);
+            g.drawLine(drawPosition, 210, drawPosition, (float)getHeight() - 90, 2.0f);
         }
         if ((float)transport.getCurrentPosition() >= duration) {
             transportStateChanged(Stopped);
@@ -633,23 +633,27 @@ void MainComponent::resized()
     stopButton.setBounds(10, 90, getWidth() - 20, 30);
     parseButton.setBounds(10, 130, getWidth() - 20, 30);
     instrumentMenu.setBounds(10, 170, getWidth() - 20, 30);
+    sliderButton.setBounds(10, 670, (getWidth() - 20) / 4-5, 30);
+    saveButton.setBounds(10+ (getWidth() - 20) / 4, 670, (getWidth() - 20) / 4+2, 30);
+   // sliderButton.setBounds(10, 210, getWidth() - 20, 30);
+    //saveButton.setBounds(10, 250, getWidth() - 20, 30);
     //bassButton.setBounds(10, 130, getWidth() - 20, 30);
     //drumsButton.setBounds(10, 170, getWidth() - 20, 30);
     //vocalsButton.setBounds(10, 210, getWidth() - 20, 30);
     //otherButton.setBounds(10, 250, getWidth() - 20, 30);
     //songButton.setBounds(10, 290, getWidth() - 20, 30);
-    decibelSlider.setBounds((getWidth() - 20) / 2 + 20, 350, (getWidth() - 30) / 2, 30);
-    distortionSlider.setBounds((getWidth() - 20) / 2 + 20, 390, (getWidth() - 30) / 2, 30);
-    scrubSlider.setBounds(0, 350, (getWidth()+20)/2, getHeight() - 380);
-    sliderButton.setBounds((getWidth() - 20) / 2 + 20, 430, (getWidth() - 30) / 2, 30);
+    decibelSlider.setBounds((getWidth() - 20) / 2 + 20, 230, (getWidth() - 30) / 2, 30);
+    distortionSlider.setBounds((getWidth() - 20) / 2 + 20, 270, (getWidth() - 30) / 2, 30);
+    scrubSlider.setBounds(0, 210, (getWidth()+20)/2, getHeight() - 300);
+    //sliderButton.setBounds((getWidth() - 20) / 2 + 20, 430, (getWidth() - 30) / 2, 30);
     //parseButton.setBounds((getWidth() - 20) / 2 + 20, 470, (getWidth() - 30) / 2, 30);
-    decibelLabel.setBounds((getWidth() - 20) / 2 + 25, 330, (getWidth() - 30) / 2, 30);
-    distortionLabel.setBounds((getWidth() - 20) / 2 + 25, 370, (getWidth() - 30) / 2, 30);
-    ReverbDial.setBounds((getWidth() - 20) / 2 + 20, 510, 75, 100);
-    reverbMenu.setBounds((getWidth() - 20) / 2 + 20, 610, 125, 30);
-    CompressionDial.setBounds((getWidth() - 20) / 2 + 170, 510, 75, 100);
-    compressionMenu.setBounds((getWidth() - 20) / 2 + 170, 610, 125, 30);
-    saveButton.setBounds((getWidth() - 20) / 2 + 20, 650, (getWidth() - 30) / 2, 30);
+    decibelLabel.setBounds((getWidth() - 20) / 2 + 25, 210, (getWidth() - 30) / 2, 30);
+    distortionLabel.setBounds((getWidth() - 20) / 2 + 25, 250, (getWidth() - 30) / 2, 30);
+    ReverbDial.setBounds((getWidth() - 20) / 2 + 20, 310, 75, 100);
+    reverbMenu.setBounds((getWidth() - 20) / 2 + 20, 410, 125, 30);
+    CompressionDial.setBounds((getWidth() - 20) / 2 + 170, 310, 75, 100);
+    compressionMenu.setBounds((getWidth() - 20) / 2 + 170, 410, 125, 30);
+    //saveButton.setBounds((getWidth() - 20) / 2 + 20, 650, (getWidth() - 30) / 2, 30);
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.
