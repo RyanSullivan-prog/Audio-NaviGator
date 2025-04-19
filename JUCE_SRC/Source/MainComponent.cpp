@@ -91,17 +91,9 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
     //decibelSlider.setSliderStyle(Slider::SliderStyle::LinearBar);
     decibelSlider.setRange(-80, 35);
     decibelSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 100, 20);
-    decibelSlider.onValueChange = [this] { level = Decibels::decibelsToGain((float)decibelSlider.getValue()); };
-    decibelSlider.setValue(juce::Decibels::gainToDecibels(level));
+    //decibelSlider.onValueChange = [this] { level = Decibels::decibelsToGain((float)decibelSlider.getValue()); };
+    //decibelSlider.setValue(juce::Decibels::gainToDecibels(level));
     addAndMakeVisible(&decibelSlider);
-
-    startTimeSlider.setRange(0.0, 1.0);
-    startTimeSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 100, 20);
-    addAndMakeVisible(&startTimeSlider);
-
-    stopTimeSlider.setRange(0.0, 1.0);
-    stopTimeSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 100, 20);
-    addAndMakeVisible(&stopTimeSlider);
 
     addAndMakeVisible(&scrubSlider);
 
@@ -115,7 +107,7 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
 
     scrubSlider.setAlpha(0);
 
-    decibelLabel.setText("Noise Level in dB", juce::dontSendNotification);
+    decibelLabel.setText("Gain Level in dB", juce::dontSendNotification);
     addAndMakeVisible(&decibelLabel);
 
     ReverbDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
@@ -190,7 +182,7 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
     if (writer != nullptr)
         writer->writeFromAudioSampleBuffer(*bufferToFill.buffer, 0, bufferToFill.buffer->getNumSamples());
         */
-    auto currentLevel = level;
+    /*auto currentLevel = level;
     auto levelScale = currentLevel * 2.0f;
     auto audioPosition = 0.0;
     for (auto channel = 0; channel < bufferToFill.buffer->getNumChannels(); ++channel) {
@@ -201,7 +193,7 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
                 buffer[sample] = buffer[sample] * levelScale - currentLevel;
             }
         }
-    }
+    }*/
 }
 
 void MainComponent::openButtonClicked()
@@ -528,7 +520,7 @@ void MainComponent::saveButtonClicked() {
             myFreezeMode = ReverbDial.getValue();
             break;
     }
-    std::string myEffects = "python main.py \"" + currentFile.getFullPathName().toStdString() + "\" " + std::to_string(myRoomSize) + " " + std::to_string(myDamping) + " " + std::to_string(myWetLevel) + " " + std::to_string(myDryLevel) + " " + std::to_string(myWidth) + " " + std::to_string(myFreezeMode);
+    std::string myEffects = "python main.py \"" + currentFile.getFullPathName().toStdString() + "\" " + std::to_string(myRoomSize) + " " + std::to_string(myDamping) + " " + std::to_string(myWetLevel) + " " + std::to_string(myDryLevel) + " " + std::to_string(myWidth) + " " + std::to_string(myFreezeMode) + " " + std::to_string(decibelSlider.getValue()) + " " + std::to_string(startEffect) + " " + std::to_string(stopEffect);
     DBG("Passing " + myEffects);
     system(myEffects.c_str());
 }
