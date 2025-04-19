@@ -95,6 +95,10 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
     //decibelSlider.setValue(juce::Decibels::gainToDecibels(level));
     addAndMakeVisible(&decibelSlider);
 
+    distortionSlider.setRange(-80, 35);
+    distortionSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 100, 20);
+    addAndMakeVisible(&distortionSlider);
+
     addAndMakeVisible(&scrubSlider);
 
     scrubSlider.setRange(0, 1);
@@ -109,6 +113,11 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
 
     decibelLabel.setText("Gain Level in dB", juce::dontSendNotification);
     addAndMakeVisible(&decibelLabel);
+
+    distortionLabel.setText("Distortion drive in dB", juce::dontSendNotification);
+    addAndMakeVisible(&distortionLabel);
+
+
 
     ReverbDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
     ReverbDial.setTextBoxStyle(juce::Slider::TextEntryBoxPosition::TextBoxRight, 70, 70, 70);
@@ -359,8 +368,6 @@ void MainComponent::bassButtonClicked()
             transportStateChanged(Stopped);
             thumbnail.setSource(new juce::FileInputSource(myBass));
             playSource.reset(newSource.release());
-            startTimeSlider.setRange(0.0, transport.getLengthInSeconds());
-            stopTimeSlider.setRange(0.0, transport.getLengthInSeconds());
             startEffect = 0.0f;
             stopEffect = 0.0f;
             sliderButton.setButtonText("Start effect");
@@ -389,8 +396,6 @@ void MainComponent::drumsButtonClicked()
             transportStateChanged(Stopped);
             thumbnail.setSource(new juce::FileInputSource(myDrums));
             playSource.reset(newSource.release());
-            startTimeSlider.setRange(0.0, transport.getLengthInSeconds());
-            stopTimeSlider.setRange(0.0, transport.getLengthInSeconds());
             startEffect = 0.0f;
             stopEffect = 0.0f;
             sliderButton.setButtonText("Start effect");
@@ -420,8 +425,6 @@ void MainComponent::vocalsButtonClicked()
             transportStateChanged(Stopped);
             thumbnail.setSource(new juce::FileInputSource(myVocals));
             playSource.reset(newSource.release());
-            startTimeSlider.setRange(0.0, transport.getLengthInSeconds());
-            stopTimeSlider.setRange(0.0, transport.getLengthInSeconds());
             startEffect = 0.0f;
             stopEffect = 0.0f;
             sliderButton.setButtonText("Start effect");
@@ -450,8 +453,6 @@ void MainComponent::otherButtonClicked()
             transportStateChanged(Stopped);
             thumbnail.setSource(new juce::FileInputSource(myOther));
             playSource.reset(newSource.release());
-            startTimeSlider.setRange(0.0, transport.getLengthInSeconds());
-            stopTimeSlider.setRange(0.0, transport.getLengthInSeconds());
             startEffect = 0.0f;
             stopEffect = 0.0f;
             sliderButton.setButtonText("Start effect");
@@ -499,7 +500,6 @@ void MainComponent::sliderButtonClicked() {
 }
 
 void MainComponent::saveButtonClicked() {
-    DBG("Saved");
     switch (prevId) {
         case room_size:
             myRoomSize = ReverbDial.getValue();
@@ -520,9 +520,9 @@ void MainComponent::saveButtonClicked() {
             myFreezeMode = ReverbDial.getValue();
             break;
     }
-    std::string myEffects = "python main.py \"" + currentFile.getFullPathName().toStdString() + "\" " + std::to_string(myRoomSize) + " " + std::to_string(myDamping) + " " + std::to_string(myWetLevel) + " " + std::to_string(myDryLevel) + " " + std::to_string(myWidth) + " " + std::to_string(myFreezeMode) + " " + std::to_string(decibelSlider.getValue()) + " " + std::to_string(startEffect) + " " + std::to_string(stopEffect);
-    DBG("Passing " + myEffects);
+    std::string myEffects = "python main.py \"" + currentFile.getFullPathName().toStdString() + "\" " + std::to_string(myRoomSize) + " " + std::to_string(myDamping) + " " + std::to_string(myWetLevel) + " " + std::to_string(myDryLevel) + " " + std::to_string(myWidth) + " " + std::to_string(myFreezeMode) + " " + std::to_string(decibelSlider.getValue()) + " " + std::to_string(startEffect) + " " + std::to_string(stopEffect) + " " + std::to_string(distortionSlider.getValue());
     system(myEffects.c_str());
+    thumbnailCache.clear();
 }
 
 void MainComponent::styleMenuChanged() {
@@ -549,32 +549,26 @@ void MainComponent::styleMenuChanged() {
     switch (styleMenu.getSelectedId())
     {
         case room_size:
-            DBG("Room size selected");
             ReverbDial.setValue(myRoomSize);
             prevId = room_size;
             break;
         case damping:
-            DBG("Damping selected");
             ReverbDial.setValue(myDamping);
             prevId = damping;
             break;
         case wet_level:
-            DBG("Wet level selected");
             ReverbDial.setValue(myWetLevel);
             prevId = wet_level;
             break;
         case dry_level:
-            DBG("Dry Level selected");
             ReverbDial.setValue(myDryLevel);
             prevId = dry_level;
             break;
         case width:
-            DBG("Width selected");
             ReverbDial.setValue(myWidth);
             prevId = width;
             break;
         case freeze_mode:
-            DBG("Freeze Mode selected");
             ReverbDial.setValue(myFreezeMode);
             prevId = freeze_mode;
             break;
@@ -701,13 +695,15 @@ void MainComponent::resized()
     otherButton.setBounds(10, 250, getWidth() - 20, 30);
     songButton.setBounds(10, 290, getWidth() - 20, 30);
     decibelSlider.setBounds((getWidth() - 20) / 2 + 20, 350, (getWidth() - 30) / 2, 30);
+    distortionSlider.setBounds((getWidth() - 20) / 2 + 20, 390, (getWidth() - 30) / 2, 30);
     scrubSlider.setBounds(0, 350, (getWidth()+20)/2, getHeight() - 380);
-    sliderButton.setBounds((getWidth() - 20) / 2 + 20, 390, (getWidth() - 30) / 2, 30);
-    parseButton.setBounds((getWidth() - 20) / 2 + 20, 430, (getWidth() - 30) / 2, 30);
+    sliderButton.setBounds((getWidth() - 20) / 2 + 20, 430, (getWidth() - 30) / 2, 30);
+    parseButton.setBounds((getWidth() - 20) / 2 + 20, 470, (getWidth() - 30) / 2, 30);
     decibelLabel.setBounds((getWidth() - 20) / 2 + 25, 330, (getWidth() - 30) / 2, 30);
-    ReverbDial.setBounds((getWidth() - 20) / 2 + 20, 470, (getWidth() - 30) / 2, 100);
-    styleMenu.setBounds((getWidth() - 20) / 2 + 20, 570, (getWidth() - 30) / 2, 30);
-    saveButton.setBounds((getWidth() - 20) / 2 + 20, 610, (getWidth() - 30) / 2, 30);
+    distortionLabel.setBounds((getWidth() - 20) / 2 + 25, 370, (getWidth() - 30) / 2, 30);
+    ReverbDial.setBounds((getWidth() - 20) / 2 + 20, 510, (getWidth() - 30) / 2, 100);
+    styleMenu.setBounds((getWidth() - 20) / 2 + 20, 610, (getWidth() - 30) / 2, 30);
+    saveButton.setBounds((getWidth() - 20) / 2 + 20, 640, (getWidth() - 30) / 2, 30);
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
     // update their positions.

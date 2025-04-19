@@ -102,6 +102,8 @@ private:
 
     Label decibelLabel;
 
+    Label distortionLabel;
+
     AudioThumbnailCache thumbnailCache;
     AudioThumbnail thumbnail;
 
@@ -109,9 +111,7 @@ private:
 
     Slider decibelSlider;
 
-    Slider startTimeSlider;
-
-    Slider stopTimeSlider;
+    Slider distortionSlider;
 
     juce::File myVocals;
     juce::File myBass;

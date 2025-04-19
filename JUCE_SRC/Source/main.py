@@ -1,10 +1,10 @@
-from pedalboard import Pedalboard, Chorus, Reverb, Phaser, Gain
+from pedalboard import Pedalboard, Chorus, Reverb, Phaser, Gain, Distortion
 from pedalboard.io import AudioFile
 import sys
 from pathlib import Path
 
 # Make a Pedalboard object, containing multiple audio plugins:
-board = Pedalboard([Reverb(room_size=float(sys.argv[2]), damping=float(sys.argv[3]), wet_level=float(sys.argv[4]), dry_level=float(sys.argv[5]), width=float(sys.argv[6]), freeze_mode=float(sys.argv[7])), Gain(float(sys.argv[8]))])
+board = Pedalboard([Reverb(room_size=float(sys.argv[2]), damping=float(sys.argv[3]), wet_level=float(sys.argv[4]), dry_level=float(sys.argv[5]), width=float(sys.argv[6]), freeze_mode=float(sys.argv[7])), Gain(float(sys.argv[8])), Distortion(float(sys.argv[11]))])
 
 myPath = Path(sys.argv[1])
 # Open an audio file for reading, just like a regular file:
