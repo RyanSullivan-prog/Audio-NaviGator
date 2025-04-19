@@ -96,9 +96,13 @@ private:
 
     Slider CompressionDial;
 
-    Slider decibelSlider;
+    Label reverbLabel;
 
-    Slider distortionSlider;
+    Label compressionLabel;
+
+    Slider decibelDial;
+
+    Slider distortionDial;
 
     juce::File myVocals;
     juce::File myBass;
