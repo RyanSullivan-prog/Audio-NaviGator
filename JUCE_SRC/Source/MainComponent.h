@@ -137,6 +137,9 @@ private:
     juce::ComboBox compressionMenu;
     void compressionMenuChanged();
 
+    juce::ComboBox instrumentMenu;
+    void instrumentMenuChanged();
+
     enum ReverbEffects {
         room_size = 1,
         damping,
@@ -151,7 +154,16 @@ private:
         thresholdDB = numberOfReverb,
         ratio,
         attackMS,
-        releaseMS
+        releaseMS,
+        numberOfCompression
+    };
+
+    enum Instruments {
+        fullSong = numberOfCompression,
+        bass,
+        drums,
+        vocals,
+        other
     };
 
     float myRoomSize = 0.5;

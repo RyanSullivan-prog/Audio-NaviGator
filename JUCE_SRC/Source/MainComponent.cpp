@@ -76,6 +76,16 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
     reverbMenu.onChange = [this] { reverbMenuChanged(); };
     reverbMenu.setSelectedId(room_size);
 
+    addAndMakeVisible(&instrumentMenu);
+    instrumentMenu.addItem("Full Song", fullSong);
+    instrumentMenu.addItem("Bass", bass);
+    instrumentMenu.addItem("Drums", drums);
+    instrumentMenu.addItem("Vocals", vocals);
+    instrumentMenu.addItem("Other", other);
+    instrumentMenu.onChange = [this] { instrumentMenuChanged(); };
+    instrumentMenu.setSelectedId(fullSong);
+    instrumentMenu.setEnabled(false);
+
     addAndMakeVisible(&compressionMenu);
     compressionMenu.addItem("Threshold dB", thresholdDB);
     compressionMenu.addItem("Ratio", ratio);
@@ -344,6 +354,7 @@ void MainComponent::parseButtonClicked()
         drumsButton.setEnabled(true);
         vocalsButton.setEnabled(true);
         otherButton.setEnabled(true);
+        instrumentMenu.setEnabled(true);
     }
     else {
         bassButton.setEnabled(false);
@@ -645,6 +656,47 @@ void MainComponent::compressionMenuChanged() {
     }
 }
 
+void MainComponent::instrumentMenuChanged() {
+    juce::File myFile = juce::File();
+    switch (instrumentMenu.getSelectedId())
+    {
+        case fullSong:
+            myFile = originalFile;
+            break;
+        case bass:
+            myFile = myBass;
+            break;
+        case drums:
+            myFile = myDrums;
+            break;
+        case vocals:
+            myFile = myVocals;
+            break;
+        case other:
+            myFile = myOther;
+            break;
+    }
+    if (myFile != juce::File{})
+    {
+        auto* reader = formatManager.createReaderFor(myFile);
+
+        if (reader != nullptr)
+        {
+            auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
+            transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
+            playButton.setEnabled(true);
+            stopButton.setEnabled(false);
+            transportStateChanged(Stopped);
+            thumbnail.setSource(new juce::FileInputSource(myFile));
+            playSource.reset(newSource.release());
+            startEffect = 0.0f;
+            stopEffect = 0.0f;
+            sliderButton.setButtonText("Start effect");
+        }
+    }
+}
+
+
 void MainComponent::transportStateChanged(TransportState newState)
 {
     if (newState != state)
@@ -758,16 +810,18 @@ void MainComponent::resized()
     openButton.setBounds(10, 10, getWidth() - 20, 30);
     playButton.setBounds(10, 50, getWidth() - 20, 30);
     stopButton.setBounds(10, 90, getWidth() - 20, 30);
-    bassButton.setBounds(10, 130, getWidth() - 20, 30);
-    drumsButton.setBounds(10, 170, getWidth() - 20, 30);
-    vocalsButton.setBounds(10, 210, getWidth() - 20, 30);
-    otherButton.setBounds(10, 250, getWidth() - 20, 30);
-    songButton.setBounds(10, 290, getWidth() - 20, 30);
+    parseButton.setBounds(10, 130, getWidth() - 20, 30);
+    instrumentMenu.setBounds(10, 170, getWidth() - 20, 30);
+    //bassButton.setBounds(10, 130, getWidth() - 20, 30);
+    //drumsButton.setBounds(10, 170, getWidth() - 20, 30);
+    //vocalsButton.setBounds(10, 210, getWidth() - 20, 30);
+    //otherButton.setBounds(10, 250, getWidth() - 20, 30);
+    //songButton.setBounds(10, 290, getWidth() - 20, 30);
     decibelSlider.setBounds((getWidth() - 20) / 2 + 20, 350, (getWidth() - 30) / 2, 30);
     distortionSlider.setBounds((getWidth() - 20) / 2 + 20, 390, (getWidth() - 30) / 2, 30);
     scrubSlider.setBounds(0, 350, (getWidth()+20)/2, getHeight() - 380);
     sliderButton.setBounds((getWidth() - 20) / 2 + 20, 430, (getWidth() - 30) / 2, 30);
-    parseButton.setBounds((getWidth() - 20) / 2 + 20, 470, (getWidth() - 30) / 2, 30);
+    //parseButton.setBounds((getWidth() - 20) / 2 + 20, 470, (getWidth() - 30) / 2, 30);
     decibelLabel.setBounds((getWidth() - 20) / 2 + 25, 330, (getWidth() - 30) / 2, 30);
     distortionLabel.setBounds((getWidth() - 20) / 2 + 25, 370, (getWidth() - 30) / 2, 30);
     ReverbDial.setBounds((getWidth() - 20) / 2 + 20, 510, 75, 100);
