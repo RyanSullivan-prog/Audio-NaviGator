@@ -146,7 +146,7 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
     phaserLabel.setText("Phaser", juce::dontSendNotification);
     addAndMakeVisible(&phaserLabel);
 
-    filterLabel.setText("Lowpass Filter Cutoff Frequency (hz)", juce::dontSendNotification);
+    filterLabel.setText("Lowpass Filter Cutoff Hz", juce::dontSendNotification);
     addAndMakeVisible(&filterLabel);
 
 
@@ -792,7 +792,7 @@ void MainComponent::resized()
     phaserLabel.setBounds((getWidth() - 20) / 2 + 20, 530, (getWidth() - 30) / 2, 30);
     phaserMenu.setBounds((getWidth() - 20) / 2 + 20, 665, 125, 30);
     filterDial.setBounds((getWidth() - 20) / 2 + 170, 550, 75, 110);
-    filterLabel.setBounds((getWidth() - 20) / 2 + 160, 530, (getWidth() - 30) / 2, 30);
+    filterLabel.setBounds((getWidth() - 20) / 2 + 140, 530, (getWidth() - 30) / 2, 30);
     //saveButton.setBounds((getWidth() - 20) / 2 + 20, 650, (getWidth() - 30) / 2, 30);
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should
