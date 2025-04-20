@@ -69,6 +69,27 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
     compressionMenu.onChange = [this] { compressionMenuChanged(); };
     compressionMenu.setSelectedId(thresholdDB);
 
+    addAndMakeVisible(&phaserMenu);
+    phaserMenu.addItem("Rate (hz)", rate);
+    phaserMenu.addItem("Depth", depth);
+    phaserMenu.addItem("Center Frequency (hz)", freq);
+    phaserMenu.addItem("Feedback", feedback);
+    phaserMenu.addItem("Mix", mix);
+    phaserMenu.onChange = [this] { phaserMenuChanged(); };
+    phaserMenu.setSelectedId(rate);
+
+    PhaserDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
+    PhaserDial.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 25);
+    PhaserDial.setRange(0.1, 4.0);
+    PhaserDial.setValue(myRate);
+    addAndMakeVisible(&PhaserDial);
+
+    filterDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
+    filterDial.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 25);
+    filterDial.setRange(10, 300.0);
+    filterDial.setValue(50);
+    addAndMakeVisible(&filterDial);
+
     CompressionDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
     CompressionDial.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 100, 25);
     CompressionDial.setRange(-60, 0.0);
@@ -113,7 +134,7 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
     decibelLabel.setText("Gain Level (dB)", juce::dontSendNotification);
     addAndMakeVisible(&decibelLabel);
 
-    distortionLabel.setText("Distortion drive (dB)", juce::dontSendNotification);
+    distortionLabel.setText("Distortion Drive (dB)", juce::dontSendNotification);
     addAndMakeVisible(&distortionLabel);
 
     reverbLabel.setText("Reverb", juce::dontSendNotification);
@@ -121,6 +142,12 @@ MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton(
 
     compressionLabel.setText("Compression", juce::dontSendNotification);
     addAndMakeVisible(&compressionLabel);
+
+    phaserLabel.setText("Phaser", juce::dontSendNotification);
+    addAndMakeVisible(&phaserLabel);
+
+    filterLabel.setText("Lowpass Filter Cutoff Frequency (hz)", juce::dontSendNotification);
+    addAndMakeVisible(&filterLabel);
 
 
     ReverbDial.setSliderStyle(juce::Slider::SliderStyle::Rotary);
@@ -384,8 +411,24 @@ void MainComponent::saveButtonClicked() {
         case releaseMS:
             myReleaseMS = CompressionDial.getValue();
             break;
+    } switch (prevPhaser) {
+        case rate:
+            myRate = PhaserDial.getValue();
+            break;
+        case depth:
+            myDepth = PhaserDial.getValue();
+            break;
+        case freq:
+            myFreq = PhaserDial.getValue();;
+            break;
+        case feedback:
+            myFeedback = PhaserDial.getValue();
+            break;
+        case mix:
+            myMix = PhaserDial.getValue();
+            break;
     }
-    std::string myEffects = "python main.py \"" + currentFile.getFullPathName().toStdString() + "\" " + std::to_string(myRoomSize) + " " + std::to_string(myDamping) + " " + std::to_string(myWetLevel) + " " + std::to_string(myDryLevel) + " " + std::to_string(myWidth) + " " + std::to_string(myFreezeMode) + " " + std::to_string(decibelDial.getValue()) + " " + std::to_string(startEffect) + " " + std::to_string(stopEffect) + " " + std::to_string(distortionDial.getValue()) + " " + std::to_string(myThresholdDB) + " " + std::to_string(myRatio) + " " + std::to_string(myAttackMS) + " " + std::to_string(myReleaseMS);
+    std::string myEffects = "python main.py \"" + currentFile.getFullPathName().toStdString() + "\" " + std::to_string(myRoomSize) + " " + std::to_string(myDamping) + " " + std::to_string(myWetLevel) + " " + std::to_string(myDryLevel) + " " + std::to_string(myWidth) + " " + std::to_string(myFreezeMode) + " " + std::to_string(decibelDial.getValue()) + " " + std::to_string(startEffect) + " " + std::to_string(stopEffect) + " " + std::to_string(distortionDial.getValue()) + " " + std::to_string(myThresholdDB) + " " + std::to_string(myRatio) + " " + std::to_string(myAttackMS) + " " + std::to_string(myReleaseMS) + " " + std::to_string(myRate) + " " + std::to_string(myDepth) + " "+ std::to_string(myFreq) + " " + std::to_string(myFeedback) + " " + std::to_string(myMix) + " " + std::to_string(filterDial.getValue());
     system(myEffects.c_str());
     thumbnailCache.clear();
 }
@@ -484,6 +527,60 @@ void MainComponent::compressionMenuChanged() {
     }
 }
 
+void MainComponent::phaserMenuChanged() {
+    switch (prevPhaser) {
+        case rate:
+            myRate = PhaserDial.getValue();
+            DBG(myRate);
+            break;
+        case depth:
+            myDepth = PhaserDial.getValue();
+            DBG(myDepth);
+            break;
+        case freq:
+            myFreq = PhaserDial.getValue();
+            DBG(myFreq);
+            break;
+        case feedback:
+            myFeedback = PhaserDial.getValue();
+            DBG(myFeedback);
+            break;
+        case mix:
+            myMix = PhaserDial.getValue();
+            DBG(myMix);
+            break;
+    }
+
+    switch (phaserMenu.getSelectedId())
+    {
+        case rate:
+            PhaserDial.setRange(0.1, 4.0);
+            PhaserDial.setValue(myRate);
+            prevPhaser = rate;
+            break;
+        case depth:
+            PhaserDial.setRange(0, 1.0);
+            PhaserDial.setValue(myDepth);
+            prevPhaser = depth;
+            break;
+        case freq:
+            PhaserDial.setRange(300, 3000.0);
+            PhaserDial.setValue(myFreq);
+            prevPhaser = freq;
+            break;
+        case feedback:
+            PhaserDial.setRange(0, 1.0);
+            PhaserDial.setValue(myFeedback);
+            prevPhaser = feedback;
+            break;
+        case mix:
+            PhaserDial.setRange(0, 1.0);
+            PhaserDial.setValue(myMix);
+            prevPhaser = mix;
+            break;
+    }
+}
+
 void MainComponent::instrumentMenuChanged() {
     juce::File myFile = juce::File();
     myRoomSize = 0.5;
@@ -505,6 +602,16 @@ void MainComponent::instrumentMenuChanged() {
     CompressionDial.setRange(-60, 0.0);
     decibelDial.setValue(0);
     distortionDial.setValue(0);
+    myRate = 1.0;
+    myDepth = 0.5;
+    myFreq = 1300.0;
+    myFeedback = 0.0;
+    myMix = 0.5;
+    prevPhaser = rate;
+    phaserMenu.setSelectedId(rate);
+    PhaserDial.setValue(myRate);
+    PhaserDial.setRange(0.1, 4.0);
+    filterDial.setValue(50.0);
     switch (instrumentMenu.getSelectedId())
     {
         case fullSong:
@@ -668,19 +775,24 @@ void MainComponent::resized()
     //vocalsButton.setBounds(10, 210, getWidth() - 20, 30);
     //otherButton.setBounds(10, 250, getWidth() - 20, 30);
     //songButton.setBounds(10, 290, getWidth() - 20, 30);
-    decibelDial.setBounds((getWidth() - 20) / 2 + 20, 230, 75, 100);
-    distortionDial.setBounds((getWidth() - 20) / 2 + 170, 230, 75, 100);
+    decibelDial.setBounds((getWidth() - 20) / 2 + 20, 240, 75, 110);
+    distortionDial.setBounds((getWidth() - 20) / 2 + 170, 240, 75, 110);
     scrubSlider.setBounds(0, 210, (getWidth()+20)/2, getHeight() - 300);
     //sliderButton.setBounds((getWidth() - 20) / 2 + 20, 430, (getWidth() - 30) / 2, 30);
     //parseButton.setBounds((getWidth() - 20) / 2 + 20, 470, (getWidth() - 30) / 2, 30);
-    decibelLabel.setBounds((getWidth() - 20) / 2 + 10, 210, (getWidth() - 30) / 2, 30);
-    distortionLabel.setBounds((getWidth() - 20) / 2 + 160, 210, (getWidth() - 30) / 2, 30);
-    ReverbDial.setBounds((getWidth() - 20) / 2 + 20, 360, 75, 100);
-    reverbLabel.setBounds((getWidth() - 20) / 2 + 20, 340, (getWidth() - 30) / 2, 30);
-    reverbMenu.setBounds((getWidth() - 20) / 2 + 20, 460, 125, 30);
-    CompressionDial.setBounds((getWidth() - 20) / 2 + 170, 360, 75, 100);
-    compressionMenu.setBounds((getWidth() - 20) / 2 + 170, 460, 125, 30);
-    compressionLabel.setBounds((getWidth() - 20) / 2 + 160, 340, (getWidth() - 30) / 2, 30);
+    decibelLabel.setBounds((getWidth() - 20) / 2 + 10, 220, (getWidth() - 30) / 2, 30);
+    distortionLabel.setBounds((getWidth() - 20) / 2 + 160, 220, (getWidth() - 30) / 2, 30);
+    ReverbDial.setBounds((getWidth() - 20) / 2 + 20, 380, 75, 110);
+    reverbLabel.setBounds((getWidth() - 20) / 2 + 20, 360, (getWidth() - 30) / 2, 30);
+    reverbMenu.setBounds((getWidth() - 20) / 2 + 20, 495, 125, 30);
+    CompressionDial.setBounds((getWidth() - 20) / 2 + 170, 380, 75, 110);
+    compressionMenu.setBounds((getWidth() - 20) / 2 + 170, 495, 125, 30);
+    compressionLabel.setBounds((getWidth() - 20) / 2 + 160, 360, (getWidth() - 30) / 2, 30);
+    PhaserDial.setBounds((getWidth() - 20) / 2 + 20, 550, 75, 110);
+    phaserLabel.setBounds((getWidth() - 20) / 2 + 20, 530, (getWidth() - 30) / 2, 30);
+    phaserMenu.setBounds((getWidth() - 20) / 2 + 20, 665, 125, 30);
+    filterDial.setBounds((getWidth() - 20) / 2 + 170, 550, 75, 110);
+    filterLabel.setBounds((getWidth() - 20) / 2 + 160, 530, (getWidth() - 30) / 2, 30);
     //saveButton.setBounds((getWidth() - 20) / 2 + 20, 650, (getWidth() - 30) / 2, 30);
     // This is called when the MainContentComponent is resized.
     // If you add any child components, this is where you should

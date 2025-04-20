@@ -89,6 +89,11 @@ private:
 
     Label distortionLabel;
 
+    Label phaserLabel;
+    Label filterLabel;
+    Slider PhaserDial;
+    Slider filterDial;
+
     AudioThumbnailCache thumbnailCache;
     AudioThumbnail thumbnail;
 
@@ -129,6 +134,9 @@ private:
     juce::ComboBox instrumentMenu;
     void instrumentMenuChanged();
 
+    juce::ComboBox phaserMenu;
+    void phaserMenuChanged();
+
     enum ReverbEffects {
         room_size = 1,
         damping,
@@ -152,7 +160,15 @@ private:
         bass,
         drums,
         vocals,
-        other
+        other,
+        numberInstruments
+    }; enum PhaserEffects {
+        rate = numberInstruments,
+        depth, 
+        freq,
+        feedback, 
+        mix,
+        numberPhaser
     };
 
     float myRoomSize = 0.5;
@@ -161,12 +177,18 @@ private:
     float myDryLevel = 0.4;
     float myWidth = 1.0;
     float myFreezeMode = 0.0;
+    int prevReverb = room_size;
     float myThresholdDB = 0.0;
     float myRatio = 1;
     float myAttackMS = 1;
     float myReleaseMS = 100;
-    int prevReverb = 1;
     int prevCompression = thresholdDB;
+    float myRate = 1.0;
+    float myDepth = 0.5;
+    float myFreq = 1300.0;
+    float myFeedback = 0.0;
+    float myMix = 0.5;
+    int prevPhaser = rate;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
