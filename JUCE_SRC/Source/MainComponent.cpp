@@ -659,8 +659,8 @@ void MainComponent::resized()
     stopButton.setBounds(10, 90, getWidth() - 20, 30);
     parseButton.setBounds(10, 130, getWidth() - 20, 30);
     instrumentMenu.setBounds(10, 170, getWidth() - 20, 30);
-    sliderButton.setBounds(10, 670, (getWidth() - 20) / 4-5, 30);
-    saveButton.setBounds(10+ (getWidth() - 20) / 4, 670, (getWidth() - 20) / 4+2, 30);
+    sliderButton.setBounds(10, getHeight() - 85, (getWidth() - 20) / 4-5, 30);
+    saveButton.setBounds(10+ (getWidth() - 20) / 4, getHeight() - 85, (getWidth() - 20) / 4+2, 30);
    // sliderButton.setBounds(10, 210, getWidth() - 20, 30);
     //saveButton.setBounds(10, 250, getWidth() - 20, 30);
     //bassButton.setBounds(10, 130, getWidth() - 20, 30);
