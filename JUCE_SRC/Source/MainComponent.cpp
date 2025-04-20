@@ -486,6 +486,25 @@ void MainComponent::compressionMenuChanged() {
 
 void MainComponent::instrumentMenuChanged() {
     juce::File myFile = juce::File();
+    myRoomSize = 0.5;
+    myDamping = 0.5;
+    myWetLevel = 0.33;
+    myDryLevel = 0.4;
+    myWidth = 1.0;
+    myFreezeMode = 0.0;
+    myThresholdDB = 0.0;
+    myRatio = 1;
+    myAttackMS = 1;
+    myReleaseMS = 100;
+    prevReverb = 1;
+    prevCompression = thresholdDB;
+    reverbMenu.setSelectedId(prevReverb);
+    compressionMenu.setSelectedId(prevCompression);
+    ReverbDial.setValue(myRoomSize);
+    CompressionDial.setValue(myThresholdDB);
+    CompressionDial.setRange(-60, 0.0);
+    decibelDial.setValue(0);
+    distortionDial.setValue(0);
     switch (instrumentMenu.getSelectedId())
     {
         case fullSong:
