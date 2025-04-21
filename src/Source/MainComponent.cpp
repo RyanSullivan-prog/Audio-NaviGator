@@ -327,6 +327,7 @@ void MainComponent::openButtonClicked()
                     sliderButton.setEnabled(true);
                     parseButton.setEnabled(true);
                     saveButton.setEnabled(true);
+                    instrumentMenu.setEnabled(false);
                 }
             }
         });
