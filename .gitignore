@@ -4,4 +4,3 @@
 *.pyc
 JUCE_SRC/Builds
 JUCE_SRC/JuceLibraryCode
-JUCE_SRC/*.jucer
