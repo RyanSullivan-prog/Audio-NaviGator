@@ -266,7 +266,13 @@ void MainComponent::openButtonClicked()
 
             std::string myFull = "demucs \"" + originalFilePath + "\"";
 
-            myPython = "python RunModel.py \"" + originalFilePath + "\"";
+            juce::File pyFile = temp.getParentDirectory();
+            pyFile = pyFile.getParentDirectory();
+            pyFile = pyFile.getChildFile("Source");
+            pyFile = pyFile.getChildFile("RunModel.py");
+
+            myPython = "python " +  pyFile.getFullPathName().toStdString() + " " + "\"" + originalFilePath + "\"";
+            DBG(myPython);
 
             myVocals = temp.getChildFile("vocals_" + fc.getResult().getFileNameWithoutExtension().toStdString() + ".wav");
             myBass = temp.getChildFile("bass_" + fc.getResult().getFileNameWithoutExtension().toStdString() + ".wav");
@@ -428,7 +434,13 @@ void MainComponent::saveButtonClicked() {
             myMix = PhaserDial.getValue();
             break;
     }
-    std::string myEffects = "python main.py \"" + currentFile.getFullPathName().toStdString() + "\" " + std::to_string(myRoomSize) + " " + std::to_string(myDamping) + " " + std::to_string(myWetLevel) + " " + std::to_string(myDryLevel) + " " + std::to_string(myWidth) + " " + std::to_string(myFreezeMode) + " " + std::to_string(decibelDial.getValue()) + " " + std::to_string(startEffect) + " " + std::to_string(stopEffect) + " " + std::to_string(distortionDial.getValue()) + " " + std::to_string(myThresholdDB) + " " + std::to_string(myRatio) + " " + std::to_string(myAttackMS) + " " + std::to_string(myReleaseMS) + " " + std::to_string(myRate) + " " + std::to_string(myDepth) + " "+ std::to_string(myFreq) + " " + std::to_string(myFeedback) + " " + std::to_string(myMix) + " " + std::to_string(filterDial.getValue());
+    juce::File temp = temp.getCurrentWorkingDirectory();
+    juce::File myEffectsFile =temp.getParentDirectory();
+    myEffectsFile = myEffectsFile.getParentDirectory();
+    myEffectsFile = myEffectsFile.getChildFile("Source");
+    myEffectsFile = myEffectsFile.getChildFile("main.py");
+    std::string myEffects = "python " + myEffectsFile.getFullPathName().toStdString() + " " + "\"" + currentFile.getFullPathName().toStdString() + "\" " + std::to_string(myRoomSize) + " " + std::to_string(myDamping) + " " + std::to_string(myWetLevel) + " " + std::to_string(myDryLevel) + " " + std::to_string(myWidth) + " " + std::to_string(myFreezeMode) + " " + std::to_string(decibelDial.getValue()) + " " + std::to_string(startEffect) + " " + std::to_string(stopEffect) + " " + std::to_string(distortionDial.getValue()) + " " + std::to_string(myThresholdDB) + " " + std::to_string(myRatio) + " " + std::to_string(myAttackMS) + " " + std::to_string(myReleaseMS) + " " + std::to_string(myRate) + " " + std::to_string(myDepth) + " " + std::to_string(myFreq) + " " + std::to_string(myFeedback) + " " + std::to_string(myMix) + " " + std::to_string(filterDial.getValue());
+    DBG(myEffects);
     system(myEffects.c_str());
     thumbnailCache.clear();
 }

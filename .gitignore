@@ -2,5 +2,5 @@
 .idea/
 *.iml
 *.pyc
-JUCE_SRC/Builds
-JUCE_SRC/JuceLibraryCode
+src/Builds
+src/JuceLibraryCode

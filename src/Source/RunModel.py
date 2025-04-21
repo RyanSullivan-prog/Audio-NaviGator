@@ -1,13 +1,19 @@
 import papermill as pm
 import sys
+import os
+import pathlib
 
-def run_notebook(file_path):
+def run_notebook(file_path, model):
+    currentDir = sys.path[0]
+    notebook = os.path.join(currentDir, 'RunModelNB.ipynb')
     pm.execute_notebook(
-        'RunModelNB.ipynb',
+        notebook,
         'output_notebook.ipynb',
-        parameters=dict(path=file_path)
+        parameters=dict(path=file_path, modelPath=model)
     )
 
 if __name__ == '__main__':
-    path = sys.argv[1]
-    run_notebook(path)
+    myPath = sys.argv[1]
+    currentDir = sys.path[0]
+    myModel = os.path.join(currentDir, 'bad.model.pth')
+    run_notebook(myPath, myModel)
