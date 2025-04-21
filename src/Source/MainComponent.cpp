@@ -8,7 +8,7 @@ using namespace juce;
 // combobox created using https://juce.com/tutorials/tutorial_combo_box/
 
 //==============================================================================
-MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton("Play"), stopButton("Stop"), sliderButton("Start effect"), parseButton("Parse Song"), saveButton("Apply Effects and Save"), thumbnailCache(5), thumbnail(512, formatManager, thumbnailCache)
+MainComponent::MainComponent() : state(Stopped), openButton("Open"), playButton("Play"), stopButton("Stop"), sliderButton("Start Effect"), parseButton("Parse Song"), saveButton("Apply Effects and Save"), thumbnailCache(5), thumbnail(512, formatManager, thumbnailCache)
 {
     // Make sure you set the size of the component after
     // you add any child components.
@@ -323,11 +323,40 @@ void MainComponent::openButtonClicked()
                     scrubSlider.setRange(0, transport.getLengthInSeconds());
                     startEffect = 0.0f;
                     stopEffect = 0.0f;
-                    sliderButton.setButtonText("Start effect");
+                    sliderButton.setButtonText("Start Effect");
                     sliderButton.setEnabled(true);
                     parseButton.setEnabled(true);
                     saveButton.setEnabled(true);
                     instrumentMenu.setEnabled(false);
+                    myRoomSize = 0.5;
+                    myDamping = 0.5;
+                    myWetLevel = 0.33;
+                    myDryLevel = 0.4;
+                    myWidth = 1.0;
+                    myFreezeMode = 0.0;
+                    myThresholdDB = 0.0;
+                    myRatio = 1;
+                    myAttackMS = 1;
+                    myReleaseMS = 100;
+                    prevReverb = 1;
+                    prevCompression = thresholdDB;
+                    reverbMenu.setSelectedId(prevReverb);
+                    compressionMenu.setSelectedId(prevCompression);
+                    ReverbDial.setValue(myRoomSize);
+                    CompressionDial.setValue(myThresholdDB);
+                    CompressionDial.setRange(-60, 0.0);
+                    decibelDial.setValue(0);
+                    distortionDial.setValue(0);
+                    myRate = 1.0;
+                    myDepth = 0.5;
+                    myFreq = 1300.0;
+                    myFeedback = 0.0;
+                    myMix = 0.5;
+                    prevPhaser = rate;
+                    phaserMenu.setSelectedId(rate);
+                    PhaserDial.setValue(myRate);
+                    PhaserDial.setRange(0.1, 4.0);
+                    filterDial.setValue(50.0);
                 }
             }
         });
@@ -364,16 +393,16 @@ void MainComponent::parseButtonClicked()
     parseButton.setEnabled(false);
     startEffect = 0.0f;
     stopEffect = 0.0f;
-    sliderButton.setButtonText("Start effect");
+    sliderButton.setButtonText("Start Effect");
 }
 
 void MainComponent::sliderButtonClicked() {
-    if (sliderButton.getButtonText().equalsIgnoreCase("Start effect")) {
-        sliderButton.setButtonText("Stop effect");
+    if (sliderButton.getButtonText().equalsIgnoreCase("Start Effect")) {
+        sliderButton.setButtonText("Stop Effect");
         startEffect = scrubSlider.getValue();
     }
     else {
-        sliderButton.setButtonText("Start effect");
+        sliderButton.setButtonText("Start Effect");
         stopEffect = scrubSlider.getValue();
     }
 }
@@ -646,7 +675,7 @@ void MainComponent::instrumentMenuChanged() {
             playSource.reset(newSource.release());
             startEffect = 0.0f;
             stopEffect = 0.0f;
-            sliderButton.setButtonText("Start effect");
+            sliderButton.setButtonText("Start Effect");
         }
     }
 }
