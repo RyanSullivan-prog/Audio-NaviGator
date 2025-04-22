@@ -268,11 +268,6 @@ void MainComponent::openButtonClicked()
 
             myPython = "python RunModel.py \"" + originalFilePath + "\"";
 
-            myVocals = temp.getChildFile("vocals_" + fc.getResult().getFileNameWithoutExtension().toStdString() + ".wav");
-            myBass = temp.getChildFile("bass_" + fc.getResult().getFileNameWithoutExtension().toStdString() + ".wav");
-            myDrums = temp.getChildFile("drums_" + fc.getResult().getFileNameWithoutExtension().toStdString() + ".wav");
-            myOther = temp.getChildFile("other_" + fc.getResult().getFileNameWithoutExtension().toStdString() + ".wav");
-
             // if using forward slash operating system use forward slashes, else backslash
            /* if (originalFilePath.find("/") != std::string::npos) {
                 myPathToInstruments = myCurrentDir + "/separated/htdemucs/" + myFileName;
@@ -315,6 +310,10 @@ void MainComponent::openButtonClicked()
                 {
                     auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);   // [11]
                     transport.setSource(newSource.get(), 0, nullptr, reader->sampleRate);       // [12]
+                    myVocals = temp.getChildFile("vocals_" + fc.getResult().getFileNameWithoutExtension().toStdString() + ".wav");
+                    myBass = temp.getChildFile("bass_" + fc.getResult().getFileNameWithoutExtension().toStdString() + ".wav");
+                    myDrums = temp.getChildFile("drums_" + fc.getResult().getFileNameWithoutExtension().toStdString() + ".wav");
+                    myOther = temp.getChildFile("other_" + fc.getResult().getFileNameWithoutExtension().toStdString() + ".wav");
                     playButton.setEnabled(true);
                     playButton.setButtonText("Play");
                     stopButton.setEnabled(false);
