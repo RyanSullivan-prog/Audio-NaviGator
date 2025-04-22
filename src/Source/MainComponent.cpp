@@ -327,6 +327,7 @@ void MainComponent::openButtonClicked()
                     sliderButton.setEnabled(true);
                     parseButton.setEnabled(true);
                     saveButton.setEnabled(true);
+                    instrumentMenu.setSelectedId(fullSong);
                     instrumentMenu.setEnabled(false);
                     myRoomSize = 0.5;
                     myDamping = 0.5;
