@@ -646,18 +646,23 @@ void MainComponent::instrumentMenuChanged() {
     {
         case fullSong:
             myFile = originalFile;
+            currentFile = originalFile;
             break;
         case bass:
             myFile = myBass;
+            currentFile = myBass;
             break;
         case drums:
             myFile = myDrums;
+            currentFile = myDrums;
             break;
         case vocals:
             myFile = myVocals;
+            currentFile = myVocals;
             break;
         case other:
             myFile = myOther;
+            currentFile = myOther;
             break;
     }
     if (myFile != juce::File{})
